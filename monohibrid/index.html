@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Monohibrid & Hukum Mendel I 3D</title>
+<style>
+:root{--bg1:#1a237e;--bg2:#00796b;--card:rgba(255,255,255,.16);--txt:#fff;--acc:#ffd54f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:"Trebuchet MS",system-ui,sans-serif;color:var(--txt);background:linear-gradient(160deg,var(--bg1),var(--bg2));display:flex;flex-direction:column}
+header{text-align:center;padding:8px 10px 0}
+h1{margin:0;font-size:18px}
+.sub{font-size:12px;opacity:.85}
+.tabs{display:flex;gap:6px;justify-content:center;padding:6px;flex-wrap:wrap}
+.tabs button,.ctl button,.btn{border:0;border-radius:18px;padding:7px 12px;font:inherit;font-size:13px;background:var(--card);color:var(--txt);cursor:pointer;margin:2px 2px 4px 0}
+.tabs button.on,.btn.on{background:var(--acc);color:#3b2a00;font-weight:bold}
+#stage{flex:1;position:relative;min-height:120px;overflow:hidden}
+canvas{position:absolute;left:0;top:0;width:100%;height:100%;display:block}
+.hint{position:absolute;top:4px;left:0;right:0;text-align:center;font-size:12px;opacity:.85;pointer-events:none}
+.ctl{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:2px}
+.legend{position:absolute;left:8px;bottom:8px;display:flex;flex-direction:column;gap:4px;font-size:12px;background:var(--card);padding:6px 10px;border-radius:12px;max-width:58%}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:middle;border:1px solid #fff}
+#info{margin:6px 8px 8px;padding:10px 14px;background:var(--card);border-radius:16px;font-size:14px;line-height:1.4;max-height:42vh;overflow:auto}
+#info b{color:var(--acc)}
+table{border-collapse:collapse;font-size:13px;margin:4px 0}
+td,th{padding:2px 8px;border-bottom:1px solid rgba(255,255,255,.3);text-align:center}
+</style>
+</head>
+<body>
+<header><h1>🧬 Monohibrid & Hukum Mendel I</h1><div class="sub">Bunga kacang ercis (U/u) dan biji pala (P/p)</div></header>
+<div class="tabs"><button data-m="0" class="on">Persilangan</button><button data-m="1">Gamet</button><button data-m="2">Punnett</button><button data-m="3">Simulasi Pala</button></div>
+<div id="stage">
+  <div class="hint">👆 Sentuh objek untuk belajar</div>
+  <div class="legend" id="legend"></div>
+</div>
+<div id="info"><div id="ctrl"></div><div id="txt"></div></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const stage=document.getElementById('stage'),ctrl=document.getElementById('ctrl'),txt=document.getElementById('txt'),legend=document.getElementById('legend');
+const scene=new THREE.Scene(),root=new THREE.Group();scene.add(root);
+const cam=new THREE.PerspectiveCamera(45,1,.1,100);
+const ren=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ren.setPixelRatio(Math.min(devicePixelRatio,2));stage.appendChild(ren.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,.8));
+const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(3,5,7);scene.add(dl);
+
+let spins=[],anim=[],pickables=[],seedsAll=[],tiles=[],mode=0,zoom=13,rotY=.4,rotX=.1,auto=true,sep=0,sepT=0,timer=null;
+const ZOOM=[14,12,12,14],RX=[.1,.1,.05,.55];
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const M=(c)=>new THREE.MeshPhongMaterial({color:c,shininess:60,side:THREE.DoubleSide});
+const PUR='#7b1fa2';
+
+function between(a,b,r,c){
+  const d=new THREE.Vector3().subVectors(b,a),m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,d.length(),12),M(c));
+  m.position.copy(a).add(b).multiplyScalar(.5);m.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return m;
+}
+function arrow(a,b){
+  root.add(between(a,b,.06,0xffffff));
+  const k=new THREE.Mesh(new THREE.ConeGeometry(.18,.38,16),M(0xffffff));
+  k.position.copy(b);k.quaternion.setFromUnitVectors(V(0,1,0),new THREE.Vector3().subVectors(b,a).normalize());root.add(k);
+}
+function spr(c,x,y,w,h,par,tx){
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  s.position.set(x,y,1.5);s.scale.set(w,h,1);(par||root).add(s);if(tx){s.userData={text:tx};pickables.push(s)}return s;
+}
+function label(t,x,y,w=3,par){
+  const c=document.createElement('canvas');c.width=320;c.height=84;const q=c.getContext('2d');
+  q.fillStyle='rgba(0,0,0,.5)';q.fillRect(4,4,312,76);q.fillStyle='#fff';q.font='bold 36px sans-serif';q.textAlign='center';q.textBaseline='middle';q.fillText(t,160,44);
+  return spr(c,x,y,w,w*84/320,par);
+}
+function bubble(ch,x,y,r,tx,par){
+  const c=document.createElement('canvas');c.width=c.height=128;const q=c.getContext('2d');
+  const rec=ch==='u'||ch==='p',fill=ch.toLowerCase()==='u'?(rec?'#f5f5f5':PUR):(rec?'#f5f5f5':'#212121'),tc=rec?(ch==='u'?PUR:'#212121'):'#fff';
+  q.fillStyle=fill;q.beginPath();q.arc(64,64,58,0,7);q.fill();q.lineWidth=6;q.strokeStyle=rec&&ch==='u'?PUR:'#fff';q.stroke();
+  q.fillStyle=tc;q.font='bold 80px sans-serif';q.textAlign='center';q.textBaseline='middle';q.fillText(ch,64,70);
+  return spr(c,x,y,r*2,r*2,par,tx);
+}
+function flower(purple,x,y,sc,tx,par,spin=true){
+  const col=purple?0x8e24aa:0xf5f5f5,g=new THREE.Group();
+  for(let i=0;i<5;i++){const a=i*Math.PI*2/5,p=new THREE.Mesh(new THREE.SphereGeometry(.34,20,16),M(col));p.scale.set(1,1.15,.35);p.position.set(Math.sin(a)*.42,Math.cos(a)*.42,0);p.rotation.z=-a;g.add(p)}
+  const c=new THREE.Mesh(new THREE.SphereGeometry(.2,20,16),M(0xffd54f));c.position.z=.08;g.add(c);
+  g.add(between(V(0,-.4,-.05),V(0,-1.2,-.05),.07,0x43a047));
+  g.traverse(m=>{if(m.isMesh){m.userData={text:tx};pickables.push(m)}});
+  g.position.set(x,y,par?.isGroup&&par!==root?.25:0);g.scale.setScalar(sc);(par||root).add(g);if(spin)spins.push(g);return g;
+}
+const setUI=(c,t)=>{ctrl.innerHTML=c;txt.innerHTML=t};
+const LEG='<div><i style="background:'+PUR+'"></i>U = alel dominan (ungu)</div><div><i style="background:#f5f5f5"></i>u = alel resesif (putih)</div>';
+const TU='<b>Alel U</b> = dominan (ungu), ditulis huruf kapital.',Tu='<b>Alel u</b> = resesif (putih), ditulis huruf kecil. Tertutupi oleh U.';
+
+function clearAll(){
+  if(timer){clearInterval(timer);timer=null}
+  while(root.children.length)root.remove(root.children[0]);
+  spins=[];anim=[];pickables=[];seedsAll=[];tiles=[];sep=0;sepT=0;
+}
+function build(m){
+  clearAll();mode=m;
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.m===m));
+  [buildCross,buildGamet,buildPunnett,buildSim][m](0);
+  rotY=.3;rotX=RX[m];zoom=ZOOM[m];
+  if(typeof resize==='function')resize();
+}
+// ---------- 0. Persilangan P -> F1 -> F2
+function buildCross(s){
+  while(root.children.length)root.remove(root.children[0]);spins=[];pickables=[];
+  const btn=['P','F1','F2'].map((n,i)=>`<button class="btn ${i===s?'on':''}" data-act="cross" data-v="${i}">${i+1}. ${n}</button>`).join('');
+  legend.innerHTML=LEG;
+  if(s===0){
+    flower(true,-2.2,.3,1,'<b>Induk ungu (UU)</b>: kedua alelnya dominan.');
+    flower(false,2.2,.3,1,'<b>Induk putih (uu)</b>: kedua alelnya resesif.');
+    bubble('U',-2.65,2.6,1.4*.5,TU);bubble('U',-1.75,2.6,.7,TU);bubble('u',1.75,2.6,.7,Tu);bubble('u',2.65,2.6,.7,Tu);
+    label('×',0,.3,.9);label('Ungu UU',-2.2,-2.1,2.6);label('Putih uu',2.2,-2.1,2.6);
+    setUI(btn,'<b>Induk (P)</b>: bunga ungu (UU) disilangkan dengan bunga putih (uu). Ungu dominan (U), putih resesif (u).');
+  }else if(s===1){
+    flower(true,-2.2,2.9,.6,'<b>Induk ungu (UU)</b>.');flower(false,2.2,2.9,.6,'<b>Induk putih (uu)</b>.');
+    label('UU',-2.2,1.5,1.4);label('uu',2.2,1.5,1.4);
+    arrow(V(-1.6,1.1,0),V(-.5,-.2,0));arrow(V(1.6,1.1,0),V(.5,-.2,0));
+    flower(true,0,-1.5,.9,'<b>F1 (Uu)</b>: semua keturunan berbunga ungu. Alel u tidak hilang, hanya tertutupi U.');
+    bubble('U',-1.6,-1.4,.6,TU);bubble('u',1.6,-1.4,.6,Tu);label('F1: semua Uu (ungu)',0,-3.4,4);
+    setUI(btn,'<b>F1</b>: seluruh keturunan pertama berbunga ungu dengan genotipe <b>Uu</b>. Alel putih (u) masih ada, tetapi tertutupi alel ungu (U).');
+  }else{
+    flower(true,-1.6,3.2,.5,'<b>Induk F1 (Uu)</b>.');flower(true,1.6,3.2,.5,'<b>Induk F1 (Uu)</b>.');
+    label('Uu',-1.6,2.05,1.3);label('Uu',1.6,2.05,1.3);label('×',0,3.2,.8);arrow(V(0,1.5,0),V(0,.6,0));
+    [['UU',1],['Uu',1],['Uu',1],['uu',0]].forEach(([g,p],i)=>{
+      const x=-2.6+i*1.73;flower(!!p,x,-.6,.55,'<b>'+g+'</b> → '+(p?'bunga <b>ungu</b>':'bunga <b>putih</b> (muncul kembali!)')+'.');label(g,x,-1.9,1.3);
+    });
+    label('F2: 3 ungu : 1 putih',0,-3.1,4.2);
+    setUI(btn,'<b>F2</b> (F1 × F1 = Uu × Uu): muncul UU, Uu, Uu, uu. Fenotipe <b>3 ungu : 1 putih</b> (75% : 25%). Bunga putih muncul kembali karena genotipe <b>uu</b>.');
+  }
+}
+// ---------- 1. Gamet / segregasi
+function buildGamet(){
+  legend.innerHTML=LEG;
+  [[-2.4,'♂'],[2.4,'♀']].forEach(([x,s],i)=>{
+    flower(true,x,2.2,.8,'<b>Induk F1 (Uu)</b>: berbunga ungu, membawa alel U dan u.');
+    label('Induk F1: Uu',x,.75,2.6);
+    const u1=bubble('U',x-.35,-.3,.6,TU),u2=bubble('u',x+.35,-.3,.6,Tu);
+    const d=i?[V(1.2,-2.6,1.5),V(3.6,-2.6,1.5)]:[V(-3.6,-2.6,1.5),V(-1.2,-2.6,1.5)];
+    anim.push({o:u1,f:V(x-.35,-.3,1.5),t:d[0]},{o:u2,f:V(x+.35,-.3,1.5),t:d[1]});
+  });
+  label('Gamet: U atau u',0,-3.9,4);
+  setUI('<button class="btn" data-act="sep">✂️ Pisahkan / satukan alel</button>',
+   '<b>Hukum Mendel I (Segregasi)</b>: saat pembentukan gamet, sepasang alel memisah secara bebas, sehingga <b>setiap gamet hanya membawa satu alel</b>. Uu → <b>U</b> atau <b>u</b>.');
+}
+// ---------- 2. Punnett 3D
+function buildPunnett(){
+  const grid=new THREE.Group();root.add(grid);spins.push(grid);grid.position.y=-.3;
+  const cells=[['UU','Uu'],['Uu','uu']],xs=[-.95,.95],ys=[.95,-.95];
+  cells.forEach((row,r)=>row.forEach((g,c)=>{
+    const t=new THREE.Mesh(new THREE.BoxGeometry(1.8,1.8,.3),M(0xffb300));
+    t.position.set(xs[c],ys[r],0);grid.add(t);tiles.push({t,g});
+    const pu=g!=='uu',tx='<b>'+g+'</b> → '+(pu?'bunga <b>ungu</b> (U menutupi u)':'bunga <b>putih</b> (dua alel resesif)')+'.';
+    t.userData={text:tx};pickables.push(t);
+    flower(pu,xs[c],ys[r]+.3,.5,tx,grid,false);label(g,xs[c],ys[r]-.62,1.2,grid).position.z=.4;
+  }));
+  xs.forEach((x,i)=>bubble(i?'u':'U',x,2.3,.65,i?Tu:TU,grid));
+  ys.forEach((y,i)=>bubble(i?'u':'U',-2.2,y,.65,i?Tu:TU,grid));
+  label('♂ →  / ↓ ♀',-2.2,2.3,1.7,grid);
+  setPun(0);
+}
+function setPun(m){
+  const C=m?{UU:0xb39ddb,Uu:0xb39ddb,uu:0xcfd8dc}:{UU:0xffb300,Uu:0xff7043,uu:0x66bb6a};
+  tiles.forEach(o=>o.t.material.color.setHex(C[o.g]));
+  legend.innerHTML=m?'<div><i style="background:#b39ddb"></i>Ungu: 3 (75%)</div><div><i style="background:#cfd8dc"></i>Putih: 1 (25%)</div>'
+    :'<div><i style="background:#ffb300"></i>UU: 1 (25%)</div><div><i style="background:#ff7043"></i>Uu: 2 (50%)</div><div><i style="background:#66bb6a"></i>uu: 1 (25%)</div>';
+  setUI(`Warnai kotak: <button class="btn ${m?'':'on'}" data-act="pun" data-v="0">Genotipe</button><button class="btn ${m?'on':''}" data-act="pun" data-v="1">Fenotipe</button>`,
+   '<b>Diagram Punnett Uu × Uu</b>: genotipe <b>1 UU : 2 Uu : 1 uu</b>, fenotipe <b>3 ungu : 1 putih</b>. Sentuh kotak untuk melihat hasilnya.');
+}
+// ---------- 3. Simulasi pala (LKM 2)
+let bowls=[],cnt={PP:0,Pp:0,pp:0},offs=[];
+function buildSim(){
+  bowls=[];cnt={PP:0,Pp:0,pp:0};
+  [-2.6,2.6].forEach((x,k)=>{
+    const g=new THREE.Group();g.position.x=x;root.add(g);spins.push(g);
+    const b=new THREE.Mesh(new THREE.SphereGeometry(1.5,32,20,0,Math.PI*2,Math.PI/2,Math.PI/2),M(0x6d4c41));
+    b.userData={text:'<b>Tempurung kelapa</b> = wadah gamet induk heterozigot <b>Pp</b>: 10 biji hitam (P) dan 10 biji putih (p).'};pickables.push(b);g.add(b);
+    const cols=[...Array(10).fill(1),...Array(10).fill(0)].sort(()=>Math.random()-.5),seeds=[];
+    cols.forEach((d,i)=>{
+      const rad=.15+.95*Math.sqrt(i/20),a=i*2.4,m=new THREE.Mesh(new THREE.SphereGeometry(.24,20,16),M(d?0x1c1c1c:0xf5f5f5));
+      m.position.set(Math.cos(a)*rad,-Math.sqrt(2.25-rad*rad)+.27,Math.sin(a)*rad);
+      m.userData={text:d?'<b>Biji pala hitam</b> = alel <b>P</b> (dominan).':'<b>Biji pala putih/pucat</b> = alel <b>p</b> (resesif).'};pickables.push(m);g.add(m);
+      const o={m,d,base:m.position.clone(),l:0,tg:0};seeds.push(o);seedsAll.push(o);
+    });
+    bowls.push(seeds);
+  });
+  offs=[-.5,.5].map(x=>{const m=new THREE.Mesh(new THREE.SphereGeometry(.3,20,16),M(0x999999));m.position.set(x,3.6,1);root.add(m);return m});
+  label('Induk jantan (Pp)',-2.6,-2.7,3);label('Induk betina (Pp)',2.6,-2.7,3);
+  legend.innerHTML='<div><i style="background:#1c1c1c"></i>P = biji hitam (dominan)</div><div><i style="background:#f5f5f5"></i>p = biji putih (resesif)</div>';
+  renderTally('-');
+}
+function pickOnce(){
+  const a=bowls[0][Math.random()*20|0],b=bowls[1][Math.random()*20|0];
+  [a,b].forEach(s=>{s.tg=1;setTimeout(()=>s.tg=0,280)});
+  const g=a.d&&b.d?'PP':(a.d||b.d?'Pp':'pp');cnt[g]++;
+  offs[0].material.color.setHex(a.d?0x1c1c1c:0xf5f5f5);offs[1].material.color.setHex(b.d?0x1c1c1c:0xf5f5f5);
+  renderTally(g);
+}
+function run30(){if(timer)return;let k=0;timer=setInterval(()=>{pickOnce();if(++k>=30){clearInterval(timer);timer=null}},320)}
+function resetTally(){if(timer){clearInterval(timer);timer=null}cnt={PP:0,Pp:0,pp:0};offs.forEach(o=>o.material.color.setHex(0x999999));renderTally('-')}
+function renderTally(last){
+  const n=cnt.PP+cnt.Pp+cnt.pp,e=f=>(n*f).toFixed(1);
+  ctrl.innerHTML=`<button class="btn" data-act="pick">🥥 Ambil 1×</button><button class="btn" data-act="run">⏩ Ambil 30×</button><button class="btn" data-act="reset">↺ Ulang</button>
+  <div>Pasangan terambil: <b>${last}</b> (n = ${n})</div>
+  <table><tr><th>Genotipe</th><th>Percobaan</th><th>Teori</th></tr><tr><td>PP</td><td>${cnt.PP}</td><td>${e(.25)}</td></tr><tr><td>Pp</td><td>${cnt.Pp}</td><td>${e(.5)}</td></tr><tr><td>pp</td><td>${cnt.pp}</td><td>${e(.25)}</td></tr></table>
+  <div>Fenotipe: hitam <b>${cnt.PP+cnt.Pp}</b> : putih <b>${cnt.pp}</b> (teori 3 : 1)</div>`;
+  txt.innerHTML=n>=30?'Hasil percobaan biasanya mendekati, tetapi tidak persis sama dengan 1 : 2 : 1, karena pengambilan biji bersifat <b>acak</b> (peluang). Induk Pp tampak hitam, namun tetap bisa menghasilkan pp (putih).'
+   :'Ambil satu biji dari tiap tempurung secara acak, pasangkan sebagai keturunan, lalu catat genotipenya (PP, Pp, atau pp). Ulangi 30 kali, seperti pada LKM 2.';
+}
+// ---------- kontrol & interaksi
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>build(+b.dataset.m));
+document.getElementById('info').addEventListener('click',e=>{
+  const b=e.target.closest('[data-act]');if(!b)return;const v=+b.dataset.v;
+  ({cross:()=>buildCross(v),sep:()=>{sepT=sepT?0:1},pun:()=>setPun(v),pick:pickOnce,run:run30,reset:resetTally})[b.dataset.act]();
+});
+const el=ren.domElement;
+el.addEventListener('click',e=>tap(e));
+el.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(8,Math.min(22,zoom+e.deltaY*.01))},{passive:false});
+const ray=new THREE.Raycaster();
+function tap(e){
+  const r=el.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),cam);
+  const h=ray.intersectObjects(pickables,false)[0];if(h&&h.object.userData.text)txt.innerHTML=h.object.userData.text;
+}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;ren.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);
+if(window.ResizeObserver)new ResizeObserver(resize).observe(stage);
+addEventListener('error',e=>{txt.textContent='Error: '+e.message});
+(function loop(){
+  requestAnimationFrame(loop);
+  spins.forEach(g=>{g.rotation.y=rotY;g.rotation.x=rotX});
+  sep+=(sepT-sep)*.08;anim.forEach(a=>a.o.position.lerpVectors(a.f,a.t,sep));
+  seedsAll.forEach(s=>{s.l+=(s.tg-s.l)*.25;s.m.position.y=s.base.y+s.l*1.1;s.m.scale.setScalar(1+s.l*.5)});
+  cam.position.set(0,0,zoom);cam.lookAt(0,0,0);ren.render(scene,cam);
+})();
+build(0);resize();
+</script>
+</body>
+</html>
