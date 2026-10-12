@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Sifat Dominan, Resesif & Intermedier 3D</title>
+<style>
+:root{--bg1:#0b3d3a;--bg2:#2e7d32;--card:rgba(255,255,255,.16);--txt:#fff;--acc:#ffd54f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:"Trebuchet MS",system-ui,sans-serif;color:var(--txt);background:linear-gradient(160deg,var(--bg1),var(--bg2));display:flex;flex-direction:column}
+header{text-align:center;padding:8px 10px 0}
+h1{margin:0;font-size:18px}
+.sub{font-size:12px;opacity:.85}
+.tabs{display:flex;gap:6px;justify-content:center;padding:6px;flex-wrap:wrap}
+.tabs button,.ctl button{border:0;border-radius:20px;padding:7px 13px;font:inherit;font-size:13px;background:var(--card);color:var(--txt);cursor:pointer}
+.tabs button.on{background:var(--acc);color:#3b2a00;font-weight:bold}
+#stage{flex:1;position:relative;min-height:0;touch-action:none}
+canvas{width:100%;height:100%;display:block}
+.hint{position:absolute;top:4px;left:0;right:0;text-align:center;font-size:12px;opacity:.85;pointer-events:none}
+.ctl{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}
+.legend{position:absolute;left:8px;bottom:8px;display:flex;flex-direction:column;gap:4px;font-size:12px;background:var(--card);padding:6px 10px;border-radius:12px;max-width:60%}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:middle}
+#info{margin:8px;padding:10px 14px;background:var(--card);border-radius:16px;font-size:14px;line-height:1.4;min-height:88px}
+#info b{color:var(--acc)}
+</style>
+</head>
+<body>
+<header><h1>🍈 Dominan, Resesif & Intermedier</h1><div class="sub">Contoh: ketebalan daging buah pala</div></header>
+<div class="tabs"><button data-m="0" class="on">Dominan</button><button data-m="1">Resesif</button><button data-m="2">Intermedier</button></div>
+<div id="stage">
+  <div class="hint">👆 Geser untuk memutar buah 360° • cubit/scroll untuk zoom • sentuh untuk belajar</div>
+  <div class="legend" id="legend"></div>
+  <div class="ctl"><button id="auto">⏸ Putar otomatis</button><button id="reset">🔄 Reset</button></div>
+</div>
+<div id="info"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const stage=document.getElementById('stage'),info=document.getElementById('info'),legend=document.getElementById('legend');
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(45,1,.1,100);
+const ren=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ren.setPixelRatio(Math.min(devicePixelRatio,2));
+stage.appendChild(ren.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,.75));
+const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(3,5,7);scene.add(dl);
+
+const GOLD='#ffb300',VIO='#8e24aa';
+let objs=[],fruits=[],pickables=[],mode=0,zoom=12,rotY=.45,rotX=.1,auto=true;
+const ZOOM=[12,12,14];
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+const M=(c,o={})=>new THREE.MeshPhongMaterial(Object.assign({color:c,shininess:60,side:THREE.DoubleSide},o));
+
+function between(a,b,r,c){
+  const d=new THREE.Vector3().subVectors(b,a),len=d.length();
+  const m=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,12),M(c));
+  m.position.copy(a).add(b).multiplyScalar(.5);
+  m.quaternion.setFromUnitVectors(V(0,1,0),d.normalize());return m;
+}
+function arrow(a,b){
+  const g=new THREE.Group();g.add(between(a,b,.06,0xffffff));
+  const k=new THREE.Mesh(new THREE.ConeGeometry(.18,.38,16),M(0xffffff));
+  k.position.copy(b);k.quaternion.setFromUnitVectors(V(0,1,0),new THREE.Vector3().subVectors(b,a).normalize());
+  g.add(k);scene.add(g);objs.push(g);
+}
+function label(t,x,y,w=3.2){
+  const c=document.createElement('canvas');c.width=320;c.height=84;const q=c.getContext('2d');
+  q.fillStyle='rgba(0,0,0,.5)';q.fillRect(4,4,312,76);
+  q.fillStyle='#fff';q.font='bold 36px sans-serif';q.textAlign='center';q.textBaseline='middle';q.fillText(t,160,44);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  s.position.set(x,y,1.5);s.scale.set(w,w*84/320,1);scene.add(s);objs.push(s);
+}
+function bubble(ch,col,r,x,y,txt){
+  const c=document.createElement('canvas');c.width=c.height=128;const q=c.getContext('2d');
+  q.fillStyle=col;q.beginPath();q.arc(64,64,58,0,7);q.fill();
+  q.lineWidth=6;q.strokeStyle='#fff';q.stroke();
+  q.fillStyle='#fff';q.font='bold 80px sans-serif';q.textAlign='center';q.textBaseline='middle';q.fillText(ch,64,70);
+  const s=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  s.position.set(x,y,1.5);s.scale.set(r*2,r*2,1);s.userData={text:txt};scene.add(s);objs.push(s);pickables.push(s);
+}
+// buah pala terbelah: tebal / sedang / tipis
+function fruit(thick,x,y,sc,txt){
+  const sr=.55,R=sr+{tebal:.85,sedang:.5,tipis:.2}[thick];
+  const g=new THREE.Group();
+  const sk=new THREE.Mesh(new THREE.SphereGeometry(R,40,24,0,Math.PI*2,0,Math.PI/2),M(0xf2c14e));
+  sk.rotation.x=-Math.PI/2;g.add(sk);
+  const ring=(i,o,c,z)=>{const m=new THREE.Mesh(new THREE.RingGeometry(i,o,64),M(c));m.position.z=z;g.add(m)};
+  ring(R-.07,R,0xd9a21b,.001);          // kulit
+  ring(sr,R-.07,0xfff1b8,.001);         // daging buah (ketebalan)
+  ring(.36,sr,0xb71c1c,.002);           // fuli (merah)
+  const seed=new THREE.Mesh(new THREE.CircleGeometry(.36,40),M(0x6d4c41));seed.position.z=.003;g.add(seed);
+  g.traverse(m=>{if(m.isMesh){m.userData={text:txt};pickables.push(m)}});
+  g.position.set(x,y,0);g.scale.setScalar(sc);scene.add(g);objs.push(g);fruits.push(g);
+  return R*sc;
+}
+const TXT_T='<b>Alel T (dominan)</b>: kuat, ditulis dengan <b>huruf kapital</b>. Bisa menutupi alel pasangannya. 💪';
+const TXT_t='<b>Alel t (resesif)</b>: lemah, ditulis dengan <b>huruf kecil</b>. Tertutupi jika berpasangan dengan T. 🙈';
+
+function build(m){
+  mode=m;
+  objs.forEach(o=>scene.remove(o));objs=[];fruits=[];pickables=[];
+  if(m===0){
+    fruit('tebal',-1.9,-.3,1,'<b>Genotipe TT</b> → daging buah <b>tebal</b>. Kedua alelnya dominan.');
+    fruit('tebal',1.9,-.3,1,'<b>Genotipe Tt</b> → daging buah tetap <b>tebal</b>, karena T menutupi t. ✅');
+    bubble('T',GOLD,.8,-2.35,2.2,TXT_T);bubble('T',GOLD,.8,-1.45,2.2,TXT_T);
+    bubble('T',GOLD,.8,1.45,2.2,TXT_T);bubble('t',VIO,.52,2.35,2.1,TXT_t);
+    label('TT = tebal',-1.9,-2.3);label('Tt = tebal',1.9,-2.3);
+    legend.innerHTML='<div><i style="background:'+GOLD+'"></i>T = alel dominan (kuat)</div><div><i style="background:'+VIO+'"></i>t = alel resesif (lemah)</div>';
+    info.innerHTML='<b>Sifat dominan</b> adalah sifat yang lebih kuat sehingga mudah tampak dan dapat menutupi sifat pasangannya. Ditulis dengan <b>huruf kapital</b>. Daging buah pala tebal (T) dominan terhadap tipis (t), jadi <b>Tt tetap tebal</b>. 🍈';
+  }else if(m===1){
+    fruit('tebal',-1.9,-.3,1,'<b>Genotipe Tt</b> → daging buah <b>tebal</b>. Alel t ada, tetapi tertutupi oleh T.');
+    fruit('tipis',1.9,-.3,1,'<b>Genotipe tt</b> → daging buah <b>tipis</b>. Sifat resesif baru tampak karena ada dua alel resesif. ✨');
+    bubble('T',GOLD,.8,-2.35,2.2,TXT_T);bubble('t',VIO,.52,-1.45,2.1,TXT_t);
+    bubble('t',VIO,.52,1.45,1.6,TXT_t);bubble('t',VIO,.52,2.35,1.6,TXT_t);
+    label('Tt = tebal',-1.9,-2.3);label('tt = tipis',1.9,-2.3);
+    legend.innerHTML='<div><i style="background:'+GOLD+'"></i>T = alel dominan</div><div><i style="background:'+VIO+'"></i>t = alel resesif</div>';
+    info.innerHTML='<b>Sifat resesif</b> tertutupi oleh sifat dominan. Sifat ini baru tampak jika individu memiliki <b>dua gen resesif</b> (huruf kecil). Daging buah tipis (t) hanya muncul pada pasangan gen <b>tt</b>. 🙌';
+  }else{
+    const pe='<b>Induk</b>: ',ph='Sifat intermedier: kedua alel sama-sama berpengaruh.';
+    fruit('tebal',-2.2,1.9,.8,pe+'daging buah <b>sangat tebal</b>.');
+    fruit('tipis',2.2,1.9,.8,pe+'daging buah <b>tipis</b>.');
+    fruit('sedang',0,-2.0,.9,'<b>Keturunan</b>: daging buah <b>ketebalan sedang</b>, perpaduan kedua induknya. '+ph);
+    bubble('',GOLD,.7,-2.7,3.9,'Alel dari induk 1 (sangat tebal).');bubble('',GOLD,.7,-1.7,3.9,'Alel dari induk 1 (sangat tebal).');
+    bubble('',VIO,.7,1.7,3.9,'Alel dari induk 2 (tipis).');bubble('',VIO,.7,2.7,3.9,'Alel dari induk 2 (tipis).');
+    bubble('',GOLD,.7,-2.0,-2.0,'Satu alel dari induk 1. '+ph);bubble('',VIO,.7,2.0,-2.0,'Satu alel dari induk 2. '+ph);
+    arrow(V(-1.6,.6,0),V(-.6,-.9,0));arrow(V(1.6,.6,0),V(.6,-.9,0));
+    label('Sangat tebal',-2.2,.35,2.8);label('Tipis',2.2,.35,2.2);label('Sedang',0,-3.6,2.4);
+    legend.innerHTML='<div><i style="background:'+GOLD+'"></i>alel induk sangat tebal</div><div><i style="background:'+VIO+'"></i>alel induk tipis</div><div>Keduanya sama kuat</div>';
+    info.innerHTML='<b>Sifat intermedier</b>: kedua gen <b>sama-sama berpengaruh</b>, sehingga keturunan memiliki sifat di antara kedua induknya. Daging buah <b>sangat tebal × tipis → ketebalan sedang</b>. ⚖️';
+  }
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.m===m));
+  rotY=.45;rotX=.1;zoom=ZOOM[m];
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>build(+b.dataset.m));
+const autoBtn=document.getElementById('auto');
+autoBtn.onclick=()=>{auto=!auto;autoBtn.textContent=auto?'⏸ Putar otomatis':'▶ Putar otomatis'};
+document.getElementById('reset').onclick=()=>{rotY=.45;rotX=.1;zoom=ZOOM[mode]};
+
+const ptrs=new Map();let pd=0,moved=0;
+const el=ren.domElement;
+el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,e);moved=0;pd=0});
+el.addEventListener('pointermove',e=>{
+  if(!ptrs.has(e.pointerId))return;
+  const o=ptrs.get(e.pointerId);ptrs.set(e.pointerId,e);
+  if(ptrs.size===1){rotY+=(e.clientX-o.clientX)*.012;rotX+=(e.clientY-o.clientY)*.01;rotX=Math.max(-1.2,Math.min(1.2,rotX));moved+=Math.abs(e.clientX-o.clientX)+Math.abs(e.clientY-o.clientY)}
+  else if(ptrs.size===2){const [a,b]=[...ptrs.values()],d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(pd)zoom=Math.max(7,Math.min(22,zoom*pd/d));pd=d;moved=99}
+});
+el.addEventListener('pointerup',e=>{ptrs.delete(e.pointerId);pd=0;if(moved<6)tap(e)});
+el.addEventListener('pointercancel',e=>ptrs.delete(e.pointerId));
+el.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(7,Math.min(22,zoom+e.deltaY*.01))},{passive:false});
+const ray=new THREE.Raycaster();
+function tap(e){
+  const r=el.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),cam);
+  const h=ray.intersectObjects(pickables,false)[0];
+  if(h&&h.object.userData.text)info.innerHTML=h.object.userData.text;
+}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;ren.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);
+(function loop(){
+  requestAnimationFrame(loop);
+  if(auto&&!ptrs.size)rotY+=.007;
+  fruits.forEach(f=>{f.rotation.y=rotY;f.rotation.x=rotX});
+  cam.position.set(0,0,zoom);cam.lookAt(0,0,0);
+  ren.render(scene,cam);
+})();
+build(0);resize();
+</script>
+</body>
+</html>
