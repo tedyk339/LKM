@@ -1,0 +1,191 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Evaluasi Akhir: Genetika dan Pewarisan Sifat</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;700&family=Nunito:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#f4f7ee;--card:#fff;--ink:#1f2a22;--mute:#5d6b60;--line:#d5e0cf;--main:#2f7d4f;--main-d:#resolved;--soft:#e6f2e2;--sun:#ffc94d;--ok:#1d8a4b;--okb:#dcf5e5;--bad:#c2384a;--badb:#fde4e7;--warn:#fff4d6;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--main-d:#256640}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#121b15;--card:#1b2820;--ink:#e9f2ea;--mute:#a2b5a6;--line:#2f4435;--main:#4cb577;--main-d:#6fd197;--soft:#223529;--ok:#5fd68c;--okb:#17382a;--bad:#ff8a98;--badb:#3d1c24;--warn:#3a3217}}
+:root[data-theme="dark"]{--bg:#121b15;--card:#1b2820;--ink:#e9f2ea;--mute:#a2b5a6;--line:#2f4435;--main:#4cb577;--main-d:#6fd197;--soft:#223529;--ok:#5fd68c;--okb:#17382a;--bad:#ff8a98;--badb:#3d1c24;--warn:#3a3217}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 Nunito,system-ui,sans-serif}
+.wrap{max-width:860px;margin:0 auto;padding:16px}
+header{background:var(--main);color:#fff;border-radius:20px;padding:20px 22px;margin-bottom:12px}
+h1{font:700 clamp(22px,4.5vw,30px)/1.15 "Baloo 2",Nunito,sans-serif;margin:0 0 4px}
+header p{margin:0;opacity:.93}
+h2{font:700 21px "Baloo 2",Nunito,sans-serif;margin:0 0 6px}
+.steps{display:flex;gap:6px;margin-bottom:12px}
+.steps i{flex:1;height:8px;border-radius:8px;background:var(--line)}
+.steps i.on{background:var(--main)}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.sec{display:none}.sec.show{display:block}
+label{font-weight:700;font-size:14px;display:block;margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
+textarea{min-height:200px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid var(--sun);border-color:var(--main)}
+.row{display:grid;grid-template-columns:2fr 1fr;gap:12px}
+button{font:700 16px Nunito,sans-serif;border:0;border-radius:12px;padding:12px 18px;cursor:pointer;min-height:46px}
+.p{background:var(--main);color:#fff}.p:hover{background:var(--main-d)}
+.s{background:var(--soft);color:var(--ink);border:2px solid var(--line)}
+.y{background:var(--sun);color:#3a2d00}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:12px}
+.q{border-top:2px dashed var(--line);padding:14px 0}
+.q:first-of-type{border-top:0}
+.q p{margin:0 0 8px;font-weight:600}
+.opt{display:block;width:100%;text-align:left;background:var(--card);color:var(--ink);border:2px solid var(--line);margin-bottom:6px;font-weight:600}
+.opt:hover:not(:disabled){border-color:var(--main)}
+.opt.ok{background:var(--okb);border-color:var(--ok)}
+.opt.bad{background:var(--badb);border-color:var(--bad)}
+.fb{margin-top:6px;padding:8px 12px;border-radius:10px;font-size:15px;display:none}
+.fb.ok{display:block;background:var(--okb)}.fb.bad{display:block;background:var(--badb)}
+.story{background:var(--warn);border-radius:12px;padding:10px 14px;margin:8px 0 12px;font-size:15px}
+table.pn{border-collapse:separate;border-spacing:6px;margin:8px 0}
+table.pn th{background:var(--main);color:#fff;border-radius:10px;padding:8px 14px;min-width:60px;text-align:center}
+table.pn td{padding:0;min-width:96px}
+table.pn td select.ok{background:var(--okb);border-color:var(--ok)}
+table.pn td select.bad{background:var(--badb);border-color:var(--bad)}
+.chk label{display:flex;gap:10px;font-weight:600;font-size:15px;align-items:flex-start;margin:6px 0}
+.chk input{width:22px;height:22px;min-height:0;flex:none;margin-top:2px}
+.big{font:700 44px/1 "Baloo 2",sans-serif;color:var(--main)}
+.cat{display:inline-block;background:var(--sun);color:#3a2d00;font-weight:700;border-radius:20px;padding:4px 14px;margin:6px 0}
+.note{color:var(--mute);font-size:14px}
+.essay{white-space:pre-wrap;background:var(--soft);border-radius:12px;padding:10px 14px;font-size:15px}
+#dl{display:none;margin-top:10px}
+@media (max-width:600px){.row{grid-template-columns:1fr}}
+@media print{
+ :root{--bg:#fff;--card:#fff;--ink:#000;--line:#999;--soft:#f0f0f0}
+ body{background:#fff}
+ header,.steps,.sec:not(#s4),.btns,#dl,.noprint{display:none!important}
+ #s4{display:block!important}.card{border:1px solid #999}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <h1>🌿 Evaluasi Akhir: Genetika dan Pewarisan Sifat</h1>
+ <p>Belajar dari kebun Pala Banda, Maluku Tengah. Tiga level, total skor 12.</p>
+</header>
+<div class="steps noprint" id="steps"><i></i><i></i><i></i><i></i><i></i></div>
+
+<section class="sec show card" id="s0">
+ <h2>👋 Halo, siap mengerjakan?</h2>
+ <p>Isi dulu identitasmu, lalu kerjakan tiga level berurutan.</p>
+ <div class="row">
+  <div><label for="nama">Nama siswa</label><input id="nama" placeholder="Tulis namamu"></div>
+  <div><label for="kelas">Kelas</label><input id="kelas" placeholder="Contoh: IX-A"></div>
+ </div>
+ <div class="btns"><button class="p" id="go">Mulai Level 1</button></div>
+ <p class="note" id="err" style="color:var(--bad)"></p>
+</section>
+
+<section class="sec" id="s1">
+ <div class="card"><h2>⭐ Level 1: Pemahaman dasar</h2>
+ <p class="note">Pilih satu jawaban. Kamu langsung tahu benar atau salah. Jawaban tidak bisa diubah.</p>
+ <div id="l1"></div>
+ <div class="btns"><button class="p" data-next>Lanjut ke Level 2</button></div></div>
+</section>
+
+<section class="sec" id="s2">
+ <div class="card"><h2>⭐⭐ Level 2: Diagram Punnett</h2>
+ <p class="note">Isi tiap kotak dengan genotipe keturunan, lalu tekan Periksa.</p>
+ <div id="l2"></div>
+ <div class="btns"><button class="p" data-next>Lanjut ke Level 3</button></div></div>
+</section>
+
+<section class="sec" id="s3">
+ <div class="card"><h2>⭐⭐⭐ Level 3: Analisis</h2>
+ <div class="story">Seorang petani di Banda menyilangkan dua pohon pala bergenotipe <b>BbKk</b> (B = biji besar, b = kecil; K = hitam, k = pucat). Keduanya berbiji hitam-besar.</div>
+ <p><b>1.</b> Tuliskan gamet yang dihasilkan, lalu hasil persilangan dihibrid (16 kemungkinan). Berapa yang berfenotipe hitam-besar? Mengapa paling banyak muncul?<br>
+ <b>2.</b> Opa Thomas memilih biji pala terbesar dan terharum, tetapi sebagian bibitnya menghasilkan buah kecil. Jelaskan dengan Hukum Mendel I dan sifat heterozigot, lalu beri saran seleksi bibit yang lebih konsisten.</p>
+ <textarea id="essay" placeholder="Ketik jawaban esaimu di sini…"></textarea>
+ <h2 style="margin-top:14px;font-size:18px">Periksa dirimu</h2>
+ <p class="note">Centang hanya yang sudah ada di esaimu. Guru akan memeriksa ulang.</p>
+ <div class="chk" id="ck"></div>
+ <div class="btns"><button class="p" id="fin">Lihat Hasil Akhir</button></div></div>
+</section>
+
+<section class="sec" id="s4">
+ <div class="card" id="res"></div>
+ <div class="card noprint">
+  <h2>📤 Simpan dan kirim</h2>
+  <div class="row"><div><label for="wa">Nomor WhatsApp guru (opsional)</label><input id="wa" inputmode="tel" placeholder="08xxxxxxxxxx"></div>
+  <div><label for="em">Email guru (opsional)</label><input id="em" type="email" placeholder="guru@sekolah.id"></div></div>
+  <div class="btns">
+   <button class="p" id="bdl">📄 Download Hasil</button>
+   <button class="y" id="bpr">🖨️ Cetak / PDF</button>
+   <button class="s" id="bwa">💬 Kirim via WhatsApp</button>
+   <button class="s" id="bem">✉️ Kirim via Email</button>
+  </div>
+  <div id="dl"><p class="note">Jika file tidak terunduh otomatis, salin teks ini dan simpan sendiri.</p><textarea id="dlt" readonly style="min-height:150px;font-size:13px"></textarea>
+  <div class="btns"><button class="s" id="bcp">Salin teks</button></div></div>
+ </div>
+</section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const L1=[
+{q:"Opa Thomas ingin tahu unit terkecil materi genetik yang menentukan satu sifat pala, misalnya ukuran biji. Unit itu disebut ....",o:["DNA","Gen","Sel","Jaringan"],a:1,e:"Gen adalah bagian DNA yang menentukan satu sifat tertentu."},
+{q:"Di dalam inti sel pohon pala Banda ada molekul berbentuk pilin ganda yang menyimpan informasi genetik. Molekul itu adalah ....",o:["Klorofil","Glukosa","DNA","Lemak"],a:2,e:"DNA menyimpan kode genetik dalam urutan basa nitrogennya."},
+{q:"Struktur berbentuk benang di dalam inti sel pala yang membawa gen-gen disebut ....",o:["Membran sel","Kromosom","Vakuola","Dinding sel"],a:1,e:"Kromosom tersusun dari DNA dan protein, dan membawa banyak gen."},
+{q:"Biji pala hitam muncul meski hanya satu induk yang membawa alelnya, sedangkan sifat pucat tertutupi. Sifat yang muncul disebut ..., yang tertutupi disebut ....",o:["dominan; resesif","resesif; dominan","fenotipe; genotipe","mutasi; hibrid"],a:0,e:"Alel dominan menutupi alel resesif pada individu heterozigot."},
+{q:"Petani Banda menyilangkan pala hanya dengan memperhatikan satu sifat beda, yaitu warna biji. Persilangan ini disebut ....",o:["Dihibrid","Monohibrid","Trihibrid","Polihibrid"],a:1,e:"Monohibrid: satu sifat beda. Dihibrid: dua sifat beda."}];
+const L2=[
+{t:"Rambut keluarga petani pala",s:"Di Banda Neira, seorang ayah berambut ikal heterozigot (Ii) menikah dengan ibu berambut lurus (ii). Ikal (I) dominan terhadap lurus (i).",top:["I","i"],left:["i","i"],o:["II","Ii","ii"],ans:["Ii","ii","Ii","ii"],ex:"Genotipe Ii : ii = 1 : 1. Fenotipe ikal : lurus = 1 : 1."},
+{t:"Biji Pala Banda",s:"Dua pohon pala induk di kebun Opa Thomas sama-sama bergenotipe Pp. Biji hitam (P) dominan terhadap biji pucat (p).",top:["P","p"],left:["P","p"],o:["PP","Pp","pp"],ans:["PP","Pp","Pp","pp"],ex:"Genotipe PP : Pp : pp = 1 : 2 : 1. Fenotipe hitam : pucat = 3 : 1."},
+{t:"Golongan darah",s:"Seorang petani pala bergolongan darah A (IᴬIᴼ) menikah dengan ibu bergolongan darah O (IᴼIᴼ) di Maluku Tengah.",top:["Iᴬ","Iᴼ"],left:["Iᴼ","Iᴼ"],o:["IᴬIᴬ","IᴬIᴼ","IᴮIᴼ","IᴼIᴼ"],ans:["IᴬIᴼ","IᴼIᴼ","IᴬIᴼ","IᴼIᴼ"],ex:"IᴬIᴼ : IᴼIᴼ = 1 : 1. Peluang anak golongan A = 50%, golongan O = 50%."}];
+const CK=["Menulis gamet BK, Bk, bK, bk dan diagram 16 kotak","Menyebut 9 dari 16 keturunan berfenotipe hitam-besar (rasio 9:3:3:1)","Menjelaskan sifat dominan (B dan K) menutupi alel resesif","Menyarankan seleksi lanjut: pilih induk murni (homozigot) atau uji keturunan"];
+let step=0,a1={},a2={},done2={};
+// Level 1
+$("l1").innerHTML=L1.map((x,i)=>`<div class="q"><p>${i+1}. ${x.q}</p>${x.o.map((t,j)=>`<button class="opt" data-q="${i}" data-o="${j}">${"abcd"[j]}. ${t}</button>`).join("")}<div class="fb" id="f1-${i}"></div></div>`).join("");
+$("l1").onclick=e=>{const b=e.target.closest(".opt");if(!b)return;const i=+b.dataset.q,j=+b.dataset.o;if(i in a1)return;a1[i]=j;const x=L1[i],r=j==x.a;
+ document.querySelectorAll(`[data-q="${i}"]`).forEach((n,k)=>{n.disabled=true;if(k==x.a)n.classList.add("ok");else if(k==j)n.classList.add("bad")});
+ const f=$("f1-"+i);f.className="fb "+(r?"ok":"bad");f.textContent=(r?"✅ Benar! ":"❌ Belum tepat. ")+x.e};
+// Level 2
+$("l2").innerHTML=L2.map((c,i)=>`<div class="q"><p>Diagram ${i+1}: ${c.t}</p><div class="story">${c.s}</div>
+<table class="pn"><tr><th></th>${c.top.map(g=>`<th>${g}</th>`).join("")}</tr>
+${[0,1].map(r=>`<tr><th>${c.left[r]}</th>${[0,1].map(k=>`<td><select data-c="${i}" data-k="${r*2+k}" aria-label="Kotak ${r+1}-${k+1}"><option value="">Pilih…</option>${c.o.map(o=>`<option>${o}</option>`).join("")}</select></td>`).join("")}</tr>`).join("")}</table>
+<button class="y" data-chk="${i}">Periksa</button><div class="fb" id="f2-${i}"></div></div>`).join("");
+$("l2").onclick=e=>{const b=e.target.closest("[data-chk]");if(!b)return;const i=+b.dataset.chk;if(i in done2)return;
+ let n=0;document.querySelectorAll(`select[data-c="${i}"]`).forEach(s=>{const ok=s.value===L2[i].ans[+s.dataset.k];if(ok)n++;s.classList.add(ok?"ok":"bad");s.disabled=true});
+ done2[i]=n;b.disabled=true;const f=$("f2-"+i);f.className="fb "+(n==4?"ok":"bad");
+ f.innerHTML=`${n==4?"✅ Sempurna!":"Benar "+n+" dari 4 kotak."} ${L2[i].ex}`};
+// Checklist
+$("ck").innerHTML=CK.map((t,i)=>`<label><input type="checkbox" class="ckb" value="${i}">${t}</label>`).join("");
+// Navigation
+function show(n){step=n;document.querySelectorAll(".sec").forEach((s,i)=>s.classList.toggle("show",i==n));
+ document.querySelectorAll("#steps i").forEach((d,i)=>d.classList.toggle("on",i<=n));window.scrollTo(0,0)}
+$("go").onclick=()=>{if(!$("nama").value.trim()||!$("kelas").value.trim()){$("err").textContent="Isi nama dan kelas dulu ya.";return}$("err").textContent="";show(1)};
+document.querySelectorAll("[data-next]").forEach(b=>b.onclick=()=>show(step+1));
+// Scoring
+function scores(){const c1=Object.keys(a1).filter(i=>a1[i]==L1[i].a).length;
+ const cells=Object.values(done2).reduce((s,v)=>s+v,0);
+ const p1=Math.round(c1*4/5),p2=Math.round(cells/3),p3=document.querySelectorAll(".ckb:checked").length;
+ return{c1,cells,p1,p2,p3,t:p1+p2+p3}}
+function cat(t){return t>=10?["Sangat Baik","Kamu sudah menguasai materi dengan sangat baik. Silakan lanjut ke kegiatan atau projek berikutnya."]:t>=7?["Baik","Kamu memahami sebagian besar materi. Ulangi sedikit bagian yang terlewat."]:t>=4?["Cukup","Kamu memahami sebagian konsep. Perkuat lagi lewat latihan."]:["Perlu Bimbingan","Kamu perlu bantuan untuk memahami konsep dasar. Mintalah bimbingan gurumu."]}
+function esc(s){return s.replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]))}
+function report(){const s=scores(),k=cat(s.t),d=new Date().toLocaleDateString("id-ID");
+ const ck=[...document.querySelectorAll(".ckb")].map(x=>(x.checked?"[v] ":"[ ] ")+CK[x.value]).join("\n");
+ return `HASIL EVALUASI AKHIR - GENETIKA DAN PEWARISAN SIFAT\nNama: ${$("nama").value}\nKelas: ${$("kelas").value}\nTanggal: ${d}\n\nSkor Level 1 (Pilihan ganda): ${s.p1}/4 (${s.c1}/5 benar)\nSkor Level 2 (Diagram Punnett): ${s.p2}/4 (${s.cells}/12 kotak benar)\nSkor Level 3 (Periksa diri esai): ${s.p3}/4 (menunggu penilaian guru)\nTOTAL: ${s.t}/12\nKategori: ${k[0]}\n\nESAI LEVEL 3:\n${$("essay").value.trim()||"(belum diisi)"}\n\nPeriksa diri:\n${ck}\n`}
+$("fin").onclick=()=>{const s=scores(),k=cat(s.t);
+ $("res").innerHTML=`<h2>🎉 Hasil akhir, ${esc($("nama").value)} (${esc($("kelas").value)})</h2><div class="big">${s.t}<span style="font-size:22px"> / 12</span></div><div class="cat">${k[0]}</div><p>${k[1]}</p>
+ <p>Level 1: <b>${s.p1}/4</b> (${s.c1} dari 5 benar)<br>Level 2: <b>${s.p2}/4</b> (${s.cells} dari 12 kotak benar)<br>Level 3: <b>${s.p3}/4</b> (periksa diri, nilai akhir oleh guru)</p>
+ <p><b>Esai kamu:</b></p><div class="essay">${esc($("essay").value.trim()||"(belum diisi)")}</div>`;show(4)};
+// Export
+$("bdl").onclick=()=>{const t=report();$("dlt").value=t;$("dl").style.display="block";
+ try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/plain;charset=utf-8"}));a.download="Hasil_Genetika_"+$("nama").value.trim().replace(/\s+/g,"_")+".txt";document.body.appendChild(a);a.click();a.remove()}catch(e){}};
+$("bcp").onclick=async()=>{const t=$("dlt");t.select();try{await navigator.clipboard.writeText(t.value)}catch(e){document.execCommand("copy")}$("bcp").textContent="Tersalin ✓"};
+$("bpr").onclick=()=>window.print();
+function open_(u){const a=document.createElement("a");a.href=u;a.target="_blank";a.rel="noopener";document.body.appendChild(a);a.click();a.remove()}
+$("bwa").onclick=()=>{let n=$("wa").value.replace(/\D/g,"");if(n.startsWith("0"))n="62"+n.slice(1);open_("https://wa.me/"+n+"?text="+encodeURIComponent(report()))};
+$("bem").onclick=()=>open_("mailto:"+encodeURIComponent($("em").value.trim())+"?subject="+encodeURIComponent("Hasil Evaluasi Genetika - "+$("nama").value)+"&body="+encodeURIComponent(report()));
+show(0);
+</script>
+</body>
+</html>
