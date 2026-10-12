@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Papan Refleksi: Pala Banda</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Quicksand:wght@500;700&family=Nunito:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#eef5ef;--card:#fff;--ink:#1f2d2a;--mute:#5a6d68;--line:#cfe0d8;--sea:#1b7f94;--leaf:#2f8a57;--earth:#8a5a2b;--sun:#ffc94d;--bad:#c2384a;
+--c1:#d9f2e3;--c2:#d6ecf7;--c3:#fdeccd;--c4:#f7dcd2;--cink:#1f2d2a;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10201e;--card:#192e2b;--ink:#e8f3ef;--mute:#9fb8b2;--line:#2c4a45;--sea:#4fc0d6;--leaf:#5fd08f;--earth:#e0b07a;--c1:#25513a;--c2:#1f4558;--c3:#5a4a21;--c4:#583329;--cink:#f2f7f4}}
+:root[data-theme="dark"]{--bg:#10201e;--card:#192e2b;--ink:#e8f3ef;--mute:#9fb8b2;--line:#2c4a45;--sea:#4fc0d6;--leaf:#5fd08f;--earth:#e0b07a;--c1:#25513a;--c2:#1f4558;--c3:#5a4a21;--c4:#583329;--cink:#f2f7f4}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.55 Nunito,system-ui,sans-serif}
+.wrap{max-width:1100px;margin:0 auto;padding:16px}
+header{background:linear-gradient(120deg,var(--sea),var(--leaf));color:#fff;border-radius:22px;padding:22px 24px;margin-bottom:16px}
+h1{font:700 clamp(22px,4.5vw,32px)/1.15 Quicksand,Nunito,sans-serif;margin:0 0 4px}
+header p{margin:0;opacity:.95}
+h2{font:700 20px Quicksand,Nunito,sans-serif;margin:0 0 10px}
+.panel{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px;margin-bottom:16px}
+.qs{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:8px;margin-bottom:14px}
+.qs div{border-radius:12px;padding:8px 12px;font-size:14px;color:var(--cink)}
+.row{display:grid;grid-template-columns:1fr 2fr;gap:12px;margin-bottom:12px}
+label{font-weight:700;font-size:14px;display:block;margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
+textarea{min-height:110px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible{outline:3px solid var(--sun);border-color:var(--sea)}
+.moods{display:flex;flex-wrap:wrap;gap:8px;margin:4px 0 12px}
+.moods input{position:absolute;opacity:0;width:1px;height:1px}
+.moods label{margin:0;border:2px solid var(--line);border-radius:30px;padding:6px 14px;cursor:pointer;font-weight:700;background:var(--card)}
+.moods input:checked+label{background:var(--sun);border-color:var(--earth);color:#3a2d00}
+.moods input:focus-visible+label{outline:3px solid var(--sun)}
+button{font:700 16px Nunito,sans-serif;border:0;border-radius:12px;padding:11px 18px;cursor:pointer;min-height:44px}
+.p{background:var(--leaf);color:#fff}.p:hover{filter:brightness(.92)}
+.s{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.y{background:var(--sun);color:#3a2d00}
+.bar{display:flex;flex-wrap:wrap;gap:8px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{padding:6px 14px;min-height:0;border-radius:20px;background:var(--card);border:2px solid var(--line);color:var(--ink);font-size:14px}
+.chip.on{background:var(--sea);border-color:var(--sea);color:#fff}
+.note{color:var(--mute);font-size:14px}
+#err{color:var(--bad);font-weight:700;min-height:1.4em;margin:4px 0}
+.board{columns:3 280px;column-gap:14px}
+.note-card{break-inside:avoid;margin:0 0 14px;border-radius:6px 6px 18px 6px;padding:14px 16px;color:var(--cink);box-shadow:0 3px 8px rgba(0,0,0,.12);position:relative}
+.note-card:nth-child(odd){transform:rotate(-.6deg)}.note-card:nth-child(even){transform:rotate(.5deg)}
+.q1{background:var(--c1)}.q2{background:var(--c2)}.q3{background:var(--c3)}.q4{background:var(--c4)}
+.nh{display:flex;justify-content:space-between;align-items:center;gap:8px;font-weight:700}
+.nh span{font-size:26px}
+.nq{font-size:13px;opacity:.85;margin:4px 0 8px;font-style:italic}
+.nt{white-space:pre-wrap;overflow-wrap:anywhere}
+.nd{font-size:12px;opacity:.7;margin-top:8px}
+.empty{text-align:center;padding:30px 10px;color:var(--mute)}
+#dl{display:none;margin-top:10px}
+#dlt{min-height:140px;font-size:13px}
+footer{text-align:center;margin-top:8px}
+footer button{background:none;color:var(--mute);font-size:13px;min-height:0;padding:6px}
+.ptitle{display:none}
+@media (max-width:640px){.row{grid-template-columns:1fr}}
+@media print{
+ :root{--bg:#fff;--card:#fff;--ink:#000;--cink:#000;--c1:#f2f2f2;--c2:#f2f2f2;--c3:#f2f2f2;--c4:#f2f2f2}
+ body{background:#fff}
+ header,.formp,.bar,#dl,footer,.qs,.noprint{display:none!important}
+ .ptitle{display:block}.panel{border:0;padding:0}
+ .board{columns:1}.note-card{transform:none!important;box-shadow:none;border:1px solid #888;border-radius:6px}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <h1>🌴 Papan Refleksi: Jejak Belajarku dari Kebun Pala</h1>
+ <p>Tempelkan kartu jawabanmu di papan. Jujur dan jelas, ya!</p>
+</header>
+
+<section class="panel formp">
+ <h2>📝 Tulis kartu refleksimu</h2>
+ <div class="qs" id="qs"></div>
+ <div class="row">
+  <div><label for="nama">Nama siswa</label><input id="nama" maxlength="40" placeholder="Nama kamu"></div>
+  <div><label for="qsel">Pertanyaan yang dijawab</label><select id="qsel"></select></div>
+ </div>
+ <label for="txt">Jawabanmu <span class="note" id="cnt">0/500</span></label>
+ <textarea id="txt" maxlength="500" placeholder="Ceritakan dengan kata-katamu sendiri…"></textarea>
+ <label style="margin-top:10px">Perasaanmu</label>
+ <div class="moods" id="moods"></div>
+ <div id="err" role="alert"></div>
+ <button class="p" id="post">📌 Tempel di papan</button>
+</section>
+
+<section class="panel">
+ <div class="bar noprint">
+  <div class="chips" id="chips"></div>
+  <div class="chips">
+   <button class="y" id="bdl">⬇️ Download Jurnal Refleksi</button>
+   <button class="s" id="bpr">🖨️ Cetak / PDF</button>
+  </div>
+ </div>
+ <div class="ptitle"><h2>Jurnal Refleksi: Pala Banda</h2></div>
+ <div id="dl"><p class="note">Jika file tidak terunduh otomatis, salin teks ini dan simpan sendiri.</p><textarea id="dlt" readonly></textarea><div style="margin-top:8px"><button class="s" id="bcp">Salin teks</button></div></div>
+ <div class="board" id="board"></div>
+ <p class="note noprint" id="info"></p>
+</section>
+
+<footer><button id="teacher" title="Khusus guru">🔒 Mode guru</button></footer>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const Q=["Bagian mana dari modul ini yang paling mudah Ale pahami? Mengapa? 🤔💭",
+"Bagian mana yang masih terasa sulit, dan apa langkah konkret yang akan Ale lakukan untuk mengatasinya? 🛠️🚀",
+"Bagaimana perasaan Ale setelah mengetahui bahwa kebiasaan Opa atau petani menyeleksi bibit pala ternyata merupakan penerapan ilmu genetika? 🌳✨",
+"Apa saja manfaat dan pengalaman berkesan yang Ale rasakan setelah menyelesaikan projek pilihan? 🌟🌿"];
+const SHORT=["Bagian paling mudah dipahami","Bagian yang masih sulit & langkahku","Perasaan tentang seleksi bibit pala","Manfaat & pengalaman projek pilihan"];
+const MOODS=[["😄","Senang"],["😕","Bingung"],["🤩","Bangga"],["🔥","Tertantang"]];
+const KEY="refleksi-pala-banda-v1",PIN="guru123";
+let notes=[],filter=0;
+function load(){try{const v=JSON.parse(localStorage.getItem(KEY)||"[]");if(Array.isArray(v))notes=v}catch(e){}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(notes));return true}catch(e){return false}}
+$("qs").innerHTML=Q.map((q,i)=>`<div class="q${i+1}"><b>${i+1}.</b> ${q.replace(/</g,"&lt;")}</div>`).join("");
+$("qsel").innerHTML=SHORT.map((s,i)=>`<option value="${i}">${i+1}. ${s}</option>`).join("");
+$("moods").innerHTML=MOODS.map((m,i)=>`<input type="radio" name="mood" id="m${i}" value="${i}"><label for="m${i}">${m[0]} ${m[1]}</label>`).join("");
+$("chips").innerHTML=["Semua",...[1,2,3,4].map(n=>"Pertanyaan "+n)].map((t,i)=>`<button class="chip${i?"":" on"}" data-f="${i}">${t}</button>`).join("");
+$("chips").onclick=e=>{const b=e.target.closest("[data-f]");if(!b)return;filter=+b.dataset.f;document.querySelectorAll(".chip").forEach(c=>c.classList.toggle("on",+c.dataset.f===filter));render()};
+$("txt").oninput=()=>$("cnt").textContent=$("txt").value.length+"/500";
+function render(){
+ const list=notes.filter(n=>!filter||n.q===filter-1);
+ const b=$("board");b.innerHTML="";
+ if(!list.length){b.innerHTML='<div class="empty">🌱 Papan masih kosong. Jadilah yang pertama menempelkan kartu!</div>'}
+ list.slice().reverse().forEach(n=>{
+  const c=document.createElement("div");c.className="note-card q"+(n.q+1);
+  const h=document.createElement("div");h.className="nh";
+  const nm=document.createElement("div");nm.textContent=n.nama;
+  const mo=document.createElement("span");mo.textContent=MOODS[n.m][0];mo.title=MOODS[n.m][1];
+  h.append(nm,mo);
+  const q=document.createElement("div");q.className="nq";q.textContent=(n.q+1)+". "+Q[n.q];
+  const t=document.createElement("div");t.className="nt";t.textContent=n.t;
+  const d=document.createElement("div");d.className="nd";d.textContent=MOODS[n.m][1]+" · "+n.d;
+  c.append(h,q,t,d);b.appendChild(c)});
+ $("info").textContent=notes.length+" kartu di papan. Kartu tersimpan di peramban (browser) ini saja.";
+}
+$("post").onclick=()=>{
+ const nama=$("nama").value.trim(),t=$("txt").value.trim(),m=document.querySelector('input[name="mood"]:checked');
+ if(!nama)return $("err").textContent="Tulis namamu dulu ya.";
+ if(t.length<5)return $("err").textContent="Jawabanmu masih terlalu pendek. Ceritakan sedikit lebih banyak.";
+ if(!m)return $("err").textContent="Pilih perasaanmu dulu ya.";
+ $("err").textContent="";
+ notes.push({nama,q:+$("qsel").value,t,m:+m.value,d:new Date().toLocaleString("id-ID",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"})});
+ if(!save())$("err").textContent="Kartu muncul, tetapi belum bisa disimpan di peramban ini.";
+ $("txt").value="";$("cnt").textContent="0/500";m.checked=false;render();
+ $("board").scrollIntoView({behavior:"smooth",block:"start"});
+};
+function report(){
+ let s="JURNAL REFLEKSI - PAPAN PALA BANDA\nDiunduh: "+new Date().toLocaleString("id-ID")+"\n\n";
+ if(!notes.length)return s+"(belum ada kartu)\n";
+ Q.forEach((q,i)=>{const l=notes.filter(n=>n.q===i);if(!l.length)return;
+  s+="Pertanyaan "+(i+1)+": "+q+"\n";
+  l.forEach(n=>{s+="  - "+n.nama+" ("+MOODS[n.m][0]+" "+MOODS[n.m][1]+", "+n.d+")\n    "+n.t.replace(/\n/g,"\n    ")+"\n"});s+="\n"});
+ return s}
+$("bdl").onclick=()=>{const t=report();$("dlt").value=t;$("dl").style.display="block";
+ try{const a=document.createElement("a");a.href=URL.createObjectURL(new Blob([t],{type:"text/plain;charset=utf-8"}));a.download="Jurnal_Refleksi_Pala_Banda.txt";document.body.appendChild(a);a.click();a.remove()}catch(e){}};
+$("bcp").onclick=async()=>{const t=$("dlt");t.select();try{await navigator.clipboard.writeText(t.value)}catch(e){document.execCommand("copy")}$("bcp").textContent="Tersalin ✓"};
+$("bpr").onclick=()=>{const f=filter;filter=0;render();window.print();filter=f;render()};
+$("teacher").onclick=()=>{
+ const p=prompt("Kode guru:");if(p===null)return;
+ if(p!==PIN)return alert("Kode salah.");
+ if(confirm("Hapus SEMUA kartu di papan ini? Tindakan ini tidak bisa dibatalkan.")){notes=[];save();render()}};
+load();render();
+</script>
+</body>
+</html>
