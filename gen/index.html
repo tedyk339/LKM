@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Petualangan Genetika 3D</title>
+<style>
+:root{--bg1:#1b1464;--bg2:#6a1b9a;--card:rgba(255,255,255,.14);--txt:#fff;--acc:#ffd54f;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;overflow:hidden}
+body{font-family:"Comic Sans MS","Trebuchet MS",system-ui,sans-serif;color:var(--txt);background:linear-gradient(160deg,var(--bg1),var(--bg2));display:flex;flex-direction:column}
+header{text-align:center;padding:8px 10px 2px}
+h1{margin:0;font-size:20px}
+.tabs{display:flex;gap:8px;justify-content:center;padding:6px}
+.tabs button,.ctl button{border:0;border-radius:20px;padding:8px 14px;font:inherit;font-size:14px;background:var(--card);color:var(--txt);cursor:pointer}
+.tabs button.on{background:var(--acc);color:#3b2a00;font-weight:bold}
+#stage{flex:1;position:relative;min-height:0;touch-action:none}
+canvas{width:100%;height:100%;display:block}
+.hint{position:absolute;top:6px;left:0;right:0;text-align:center;font-size:12px;opacity:.8;pointer-events:none}
+.ctl{position:absolute;right:8px;bottom:8px;display:flex;flex-direction:column;gap:6px}
+.legend{position:absolute;left:8px;bottom:8px;display:flex;flex-direction:column;gap:4px;font-size:12px;background:var(--card);padding:6px 10px;border-radius:12px}
+.legend i{display:inline-block;width:12px;height:12px;border-radius:50%;margin-right:6px;vertical-align:middle}
+#info{margin:8px;padding:10px 14px;background:var(--card);border-radius:16px;font-size:14px;line-height:1.4;min-height:84px}
+#info b{color:var(--acc)}
+.tabs{flex-wrap:wrap;gap:6px}.tabs button{padding:6px 11px;font-size:13px}</style>
+</head>
+<body>
+<header><h1>🧬 Petualangan Genetika 3D</h1></header>
+<div class="tabs"><button data-m="0" class="on">Genetika</button><button data-m="3">Gen</button><button data-m="1">DNA</button><button data-m="2">Kromosom</button><button data-m="4">Hubungan</button></div>
+<div id="stage">
+  <div class="hint">👆 Geser untuk memutar 360° • cubit/scroll untuk zoom • sentuh bagian untuk belajar</div>
+  <div class="legend" id="legend"></div>
+  <div class="ctl"><button id="auto">⏸ Putar otomatis</button><button id="reset">🔄 Reset</button></div>
+</div>
+<div id="info"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const stage=document.getElementById('stage'),info=document.getElementById('info'),legend=document.getElementById('legend');
+const scene=new THREE.Scene();
+const cam=new THREE.PerspectiveCamera(45,1,.1,100);
+const ren=new THREE.WebGLRenderer({antialias:true,alpha:true});
+ren.setPixelRatio(Math.min(devicePixelRatio,2));
+stage.appendChild(ren.domElement);
+scene.add(new THREE.AmbientLight(0xffffff,.7));
+const dl=new THREE.DirectionalLight(0xffffff,.9);dl.position.set(3,5,6);scene.add(dl);
+const dl2=new THREE.PointLight(0xffaaff,.6);dl2.position.set(-4,-3,3);scene.add(dl2);
+
+const COL={A:0xff5252,T:0xffd740,C:0x40c4ff,G:0x69f0ae};
+const NAME={A:'Adenin',T:'Timin',C:'Sitosin',G:'Guanin'};
+const PAIR={A:'T',T:'A',C:'G',G:'C'};
+let root=new THREE.Group();scene.add(root);
+let mode=1,zoom=11,rotY=0,rotX=0.2,auto=true,pickables=[];
+
+function mat(c){return new THREE.MeshPhongMaterial({color:c,shininess:80})}
+function between(a,b,r,m){
+  const d=new THREE.Vector3().subVectors(b,a),len=d.length();
+  const g=new THREE.Mesh(new THREE.CylinderGeometry(r,r,len,12),m);
+  g.position.copy(a).add(b).multiplyScalar(.5);
+  g.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.normalize());
+  return g;
+}
+const V=(x,y,z)=>new THREE.Vector3(x,y,z);
+function label(t,x,y,z=0,w=2.6){
+  const c=document.createElement('canvas');c.width=256;c.height=96;const q=c.getContext('2d');
+  q.fillStyle='rgba(0,0,0,.45)';q.fillRect(4,4,248,88);
+  q.fillStyle='#fff';q.font='bold 40px sans-serif';q.textAlign='center';q.textBaseline='middle';q.fillText(t,128,50);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(c),transparent:true,depthTest:false}));
+  sp.position.set(x,y,z);sp.scale.set(w,w*96/256,1);root.add(sp);
+}
+function pick(g,txt){g.traverse(m=>{if(m.isMesh){m.userData={text:txt};pickables.push(m)}})}
+function buildDNA(g){
+  const seq='ATCGGCTAACGTTAGCCGATCGTA'.split('');
+  const n=seq.length,rise=.42,tw=.55,R=1.3;
+  root.position.y=0;
+  let prev=null;
+  seq.forEach((b,i)=>{
+    const dim=g&&!(i>=8&&i<16);
+    const y=(i-n/2)*rise,a=i*tw;
+    const p1=V(Math.cos(a)*R,y,Math.sin(a)*R);
+    const p2=V(Math.cos(a+Math.PI)*R,y,Math.sin(a+Math.PI)*R);
+    const mid=V(0,y,0);
+    [[p1,b],[p2,PAIR[b]]].forEach(([p,c])=>{
+      const cc=dim?0x78909c:COL[c];
+      const ud=dim?{text:'<b>Bagian DNA lain</b>: DNA panjang sekali dan berisi ribuan gen. Bagian abu-abu ini bukan gen yang sedang kita lihat. 🔗'}:{base:c,partner:PAIR[c]};
+      const half=between(mid,p,.11,mat(cc));half.userData=ud;
+      root.add(half);pickables.push(half);
+      const sp=new THREE.Mesh(new THREE.SphereGeometry(.26,20,20),mat(0xeceff1));sp.position.copy(p);root.add(sp);
+      const k=new THREE.Mesh(new THREE.SphereGeometry(.17,16,16),mat(cc));k.position.copy(mid.clone().lerp(p,.5));k.userData=ud;root.add(k);pickables.push(k);
+    });
+    if(prev){root.add(between(prev[0],p1,.09,mat(0xb39ddb)));root.add(between(prev[1],p2,.09,mat(0xb39ddb)))}
+    prev=[p1,p2];
+  });
+  if(g){
+    const y0=(8-n/2)*rise,y1=(15-n/2)*rise,h=y1-y0+.5;
+    const cy=new THREE.Mesh(new THREE.CylinderGeometry(1.9,1.9,h,32,1,true),new THREE.MeshPhongMaterial({color:0xffd740,transparent:true,opacity:.25,depthWrite:false,side:THREE.DoubleSide}));
+    cy.position.y=(y0+y1)/2;root.add(cy);
+    [y0-.25,y1+.25].forEach(y=>{const t=new THREE.Mesh(new THREE.TorusGeometry(1.9,.07,12,40),mat(0xffd740));t.rotation.x=Math.PI/2;t.position.y=y;root.add(t);pickables.push(t);
+      t.userData={text:'<b>Gen</b> = potongan DNA yang membawa kode untuk <b>satu sifat</b>, misalnya warna mata. Seperti satu resep dalam buku resep yang besar! 📖'}});
+    label('GEN',2.7,(y0+y1)/2,0,2);
+    legend.innerHTML='<div><i style="background:#ffd740"></i>Gen (membawa 1 sifat)</div><div><i style="background:#78909c"></i>DNA lainnya</div>';
+    info.innerHTML='<b>Gen</b> adalah potongan DNA yang membawa kode satu sifat. Bagian berkilau emas adalah gen; sentuh untuk belajar! ✨';
+    return;
+  }
+  legend.innerHTML=Object.keys(COL).map(k=>`<div><i style="background:#${COL[k].toString(16).padStart(6,'0')}"></i>${k} = ${NAME[k]}</div>`).join('');
+  info.innerHTML='<b>DNA</b> bentuknya seperti tangga yang dipelintir (<b>heliks ganda</b>). Sentuh anak tangga warna-warni untuk mengenal pasangan basa! 🪜';
+}
+function arm(from,to,r,c){
+  const g=new THREE.Group();
+  g.add(between(from,to,r,mat(c)));
+  const s=new THREE.Mesh(new THREE.SphereGeometry(r,20,20),mat(c));s.position.copy(to);g.add(s);
+  return g;
+}
+function buildChromo(){
+  const cA=0xff6fb5,cB=0x7c4dff,V=(x,y,z)=>new THREE.Vector3(x,y,z),o=V(0,0,0);
+  const parts=[
+    [arm(o,V(-.9,2.6,0),.55,cA),'Lengan pendek kromatid kakak'],
+    [arm(o,V(-.9,-3.6,0),.55,cA),'Lengan panjang kromatid kakak'],
+    [arm(o,V(.9,2.6,0),.55,cB),'Lengan pendek kromatid adik'],
+    [arm(o,V(.9,-3.6,0),.55,cB),'Lengan panjang kromatid adik']
+  ];
+  parts.forEach(([g,t])=>{g.traverse(m=>{if(m.isMesh){m.userData={text:'<b>Kromatid</b>: '+t+'. Dua kromatid kembar terbentuk saat DNA disalin. 👯'};pickables.push(m)}});root.add(g)});
+  [[.9,-1.8],[1.5,-.5],[-.9,1.5],[-1.5,-2.6]].forEach(([r,y],i)=>{});
+  [-2.4,-1.4,1.2,1.9].forEach(y=>{
+    const t=new THREE.Mesh(new THREE.TorusGeometry(.62,.07,12,32),mat(0xffee58));
+    t.position.set(y>0?0:0,y,0);t.rotation.x=Math.PI/2;t.userData={text:'<b>Pita warna</b>: tiap pita berisi banyak <b>gen</b> pembawa sifat, seperti warna rambut dan mata! 🎨'};root.add(t);pickables.push(t);
+  });
+  const c=new THREE.Mesh(new THREE.SphereGeometry(.75,28,28),mat(0xffd740));
+  c.userData={text:'<b>Sentromer</b>: bagian "pinggang" yang menyatukan dua kromatid. 🤝'};root.add(c);pickables.push(c);
+  root.position.y=.5;
+  legend.innerHTML='<div><i style="background:#ff6fb5"></i>Kromatid 1</div><div><i style="background:#7c4dff"></i>Kromatid 2</div><div><i style="background:#ffd740"></i>Sentromer</div>';
+  info.innerHTML='<b>Kromosom</b> adalah gulungan DNA yang rapi. Manusia punya <b>46 kromosom</b> di setiap sel! Sentuh bagiannya untuk belajar. 🔍';
+}
+function person(col,x,y,sc,txt){
+  const g=new THREE.Group();
+  const add=(geo,c,px,py,pz)=>{const m=new THREE.Mesh(geo,mat(c));m.position.set(px,py,pz);g.add(m)};
+  add(new THREE.ConeGeometry(.9,1.8,24),col,0,-.8,0);
+  add(new THREE.SphereGeometry(.7,24,24),0xffe0b2,0,.6,0);
+  add(new THREE.SphereGeometry(.09,12,12),0x333333,-.25,.7,.64);
+  add(new THREE.SphereGeometry(.09,12,12),0x333333,.25,.7,.64);
+  pick(g,txt);g.position.set(x,y,0);g.scale.setScalar(sc);root.add(g);
+}
+function miniChromo(c,x,y,sc,txt){
+  const g=new THREE.Group(),o=V(0,0,0);
+  [[-.25,.6],[.25,.6],[-.25,-.6],[.25,-.6]].forEach(([dx,dy])=>g.add(arm(o,V(dx,dy,0),.14,c)));
+  pick(g,txt);g.position.set(x,y,0);g.scale.setScalar(sc);root.add(g);
+}
+function arrow(a,b,c=0xffffff){
+  root.add(between(a,b,.07,mat(c)));
+  const d=new THREE.Vector3().subVectors(b,a).normalize();
+  const k=new THREE.Mesh(new THREE.ConeGeometry(.2,.4,16),mat(c));
+  k.position.copy(b);k.quaternion.setFromUnitVectors(V(0,1,0),d);root.add(k);
+}
+function buildGenetika(){
+  root.position.y=0;
+  const tI='<b>Ibu</b> dan <b>ayah</b> sama-sama punya gen. Gen mereka diturunkan kepada anak lewat sel kelamin. 👪';
+  person(0xff80ab,-3,2.2,1,tI);person(0x64b5f6,3,2.2,1,tI);
+  person(0xba68c8,0,-3.4,.9,'<b>Anak</b> mendapat separuh gen dari ibu dan separuh dari ayah, sehingga mirip keduanya tetapi tidak persis sama! 🧒');
+  miniChromo(0xff80ab,-3,-.7,1,'Kromosom ibu membawa gen yang akan diwariskan. 🎀');
+  miniChromo(0x64b5f6,3,-.7,1,'Kromosom ayah membawa gen yang akan diwariskan. 💙');
+  arrow(V(-2.7,-1.4,0),V(-.7,-2.3,0),0xff80ab);arrow(V(2.7,-1.4,0),V(.7,-2.3,0),0x64b5f6);
+  miniChromo(0xff80ab,-1.9,-3.7,.6,'Kromosom dari ibu. 🎀');miniChromo(0x64b5f6,1.9,-3.7,.6,'Kromosom dari ayah. 💙');
+  label('Ibu',-3,4.2);label('Ayah',3,4.2);label('Anak',0,-1.9,0,2);
+  legend.innerHTML='<div><i style="background:#ff80ab"></i>Gen dari ibu</div><div><i style="background:#64b5f6"></i>Gen dari ayah</div>';
+  info.innerHTML='<b>Genetika</b> adalah ilmu yang mempelajari bagaimana sifat (warna mata, rambut, dll.) diwariskan dari orang tua ke anak lewat <b>gen</b>. Sentuh ibu, ayah, atau anak! 👨‍👩‍👧';
+}
+function miniHelix(n,y,txt){
+  const g=new THREE.Group(),R=.6,rise=.2,tw=.6,seq='ATCGGCTAACGT';let prev=null;
+  for(let i=0;i<n;i++){
+    const yy=(i-n/2+.5)*rise,a=i*tw,b=seq[i%12];
+    const p1=V(Math.cos(a)*R,yy,Math.sin(a)*R),p2=V(Math.cos(a+Math.PI)*R,yy,Math.sin(a+Math.PI)*R),m=V(0,yy,0);
+    g.add(between(p1,m,.05,mat(COL[b])));g.add(between(m,p2,.05,mat(COL[PAIR[b]])));
+    [p1,p2].forEach(p=>{const s=new THREE.Mesh(new THREE.SphereGeometry(.11,12,12),mat(0xeceff1));s.position.copy(p);g.add(s)});
+    if(prev){g.add(between(prev[0],p1,.04,mat(0xb39ddb)));g.add(between(prev[1],p2,.04,mat(0xb39ddb)))}
+    prev=[p1,p2];
+  }
+  pick(g,txt);g.position.y=y;root.add(g);return g;
+}
+function buildHubungan(){
+  root.position.y=0;
+  const o=V(0,0,0),X=2.7;
+  const kg=new THREE.Group();
+  [[-.25,.6],[.25,.6],[-.25,-.6],[.25,-.6]].forEach(([dx,dy])=>kg.add(arm(o,V(dx,dy,0),.14,dx<0?0xff6fb5:0x7c4dff)));
+  kg.scale.setScalar(1.2);kg.position.y=4.3;
+  pick(kg,'<b>Kromosom</b> berada di dalam inti sel. Kromosom adalah gulungan DNA yang rapi. Manusia punya 46 kromosom! 🧶');root.add(kg);
+  miniHelix(12,1.5,'<b>DNA</b> tersusun di dalam kromosom. DNA adalah "buku petunjuk" panjang yang menyimpan kode kehidupan. 📚');
+  const gh=miniHelix(6,-1.2,'<b>Gen</b> adalah potongan DNA yang membawa kode satu sifat. Ada ribuan gen dalam DNA kita! ✂️');
+  const cy=new THREE.Mesh(new THREE.CylinderGeometry(1,1,1.5,24,1,true),new THREE.MeshPhongMaterial({color:0xffd740,transparent:true,opacity:.28,depthWrite:false,side:THREE.DoubleSide}));
+  cy.position.y=-1.2;root.add(cy);
+  const eye=new THREE.Group(),add=(r,c,z,zs)=>{const m=new THREE.Mesh(new THREE.SphereGeometry(r,24,24),mat(c));m.position.z=z;m.scale.z=zs;eye.add(m)};
+  add(.7,0xffffff,0,1);add(.38,0x8d6e63,.55,.4);add(.18,0x212121,.7,.3);
+  eye.position.y=-3.9;pick(eye,'<b>Sifat</b> (misalnya warna mata) muncul karena kerja gen. <b>Genetika</b> mempelajari bagaimana gen mewariskan sifat. 👁️');root.add(eye);
+  arrow(V(0,3.4,0),V(0,2.85,0));arrow(V(0,.15,0),V(0,-.4,0));arrow(V(0,-2.1,0),V(0,-2.95,0));
+  label('Kromosom',X,4.3);label('DNA',X,1.5,0,2);label('Gen',X,-1.2,0,2);label('Sifat',X,-3.9,0,2);
+  legend.innerHTML='<div>⬇ berisi / menentukan</div>';
+  info.innerHTML='<b>Hubungannya:</b> kromosom (di inti sel) tersusun dari <b>DNA</b>. Potongan DNA pembawa kode sifat disebut <b>gen</b>. Gen menentukan <b>sifat</b>. <b>Genetika</b> adalah ilmu yang mempelajari semuanya! 🎓';
+}
+const ZOOM={0:15,1:11,2:12,3:11,4:15};
+function load(m){
+  mode=m;while(root.children.length)root.remove(root.children[0]);pickables=[];
+  [buildGenetika,()=>buildDNA(false),buildChromo,()=>buildDNA(true),buildHubungan][m]();
+  document.querySelectorAll('.tabs button').forEach(b=>b.classList.toggle('on',+b.dataset.m===m));
+  rotY=0;rotX=.2;zoom=ZOOM[m];
+}
+document.querySelectorAll('.tabs button').forEach(b=>b.onclick=()=>load(+b.dataset.m));
+auto_=document.getElementById('auto');
+auto_.onclick=()=>{auto=!auto;auto_.textContent=auto?'⏸ Putar otomatis':'▶ Putar otomatis'};
+reset.onclick=()=>{rotY=0;rotX=.2;zoom=ZOOM[mode]};
+
+// interaksi: drag, pinch, wheel, tap
+const ptrs=new Map();let pd=0,moved=0,start=null;
+const el=ren.domElement;
+el.addEventListener('pointerdown',e=>{el.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,e);moved=0;start={x:e.clientX,y:e.clientY};pd=0});
+el.addEventListener('pointermove',e=>{
+  if(!ptrs.has(e.pointerId))return;
+  const old=ptrs.get(e.pointerId);ptrs.set(e.pointerId,e);
+  if(ptrs.size===1){rotY+=(e.clientX-old.clientX)*.01;rotX+=(e.clientY-old.clientY)*.01;rotX=Math.max(-1.4,Math.min(1.4,rotX));moved+=Math.abs(e.clientX-old.clientX)+Math.abs(e.clientY-old.clientY)}
+  else if(ptrs.size===2){const [a,b]=[...ptrs.values()],d=Math.hypot(a.clientX-b.clientX,a.clientY-b.clientY);if(pd)zoom=Math.max(5,Math.min(22,zoom*pd/d));pd=d;moved=99}
+});
+const up=e=>{ptrs.delete(e.pointerId);pd=0;if(moved<6&&start)tap(e)};
+el.addEventListener('pointerup',up);el.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId)});
+el.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(5,Math.min(22,zoom+e.deltaY*.01))},{passive:false});
+const ray=new THREE.Raycaster();
+function tap(e){
+  const r=el.getBoundingClientRect();
+  ray.setFromCamera(new THREE.Vector2(((e.clientX-r.left)/r.width)*2-1,-((e.clientY-r.top)/r.height)*2+1),cam);
+  const h=ray.intersectObjects(pickables,false)[0];if(!h)return;
+  const d=h.object.userData;
+  if(d.base)info.innerHTML=`<b>${d.base} = ${NAME[d.base]}</b> selalu berpasangan dengan <b>${PAIR[d.base]} = ${NAME[PAIR[d.base]]}</b>. Seperti dua kepingan puzzle yang pas! 🧩`;
+  else if(d.text)info.innerHTML=d.text;
+}
+function resize(){const w=stage.clientWidth,h=stage.clientHeight;ren.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
+addEventListener('resize',resize);
+function loop(){
+  requestAnimationFrame(loop);
+  if(auto&&!ptrs.size)rotY+=.006;
+  root.rotation.y=rotY;root.rotation.x=rotX;
+  cam.position.set(0,0,zoom);cam.lookAt(0,0,0);
+  ren.render(scene,cam);
+}
+load(0);resize();loop();
+</script>
+</body>
+</html>
