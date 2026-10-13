@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Proyek: Menjadi Peneliti Muda dari Maluku Tengah</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lora:wght@600;700&family=Nunito:wght@400;600;700&display=swap">
+<style>
+:root{--bg:#f6f3ea;--card:#fffdf8;--ink:#2a2a22;--mute:#665f50;--line:#ddd3bd;--leaf:#2f7a4a;--leaf-d:#235c37;--bark:#7a4b25;--mace:#c2453a;--soft:#e8f1e2;--sand:#f3e8d0;--sun:#ffc94d;
+box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#171a14;--card:#20251c;--ink:#ece9de;--mute:#b0aa98;--line:#3a4132;--leaf:#6cc58a;--leaf-d:#8ad9a5;--bark:#d9a46c;--mace:#ff8a7c;--soft:#26362b;--sand:#3a3220}}
+:root[data-theme="dark"]{--bg:#171a14;--card:#20251c;--ink:#ece9de;--mute:#b0aa98;--line:#3a4132;--leaf:#6cc58a;--leaf-d:#8ad9a5;--bark:#d9a46c;--mace:#ff8a7c;--soft:#26362b;--sand:#3a3220}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.6 Nunito,system-ui,sans-serif}
+.wrap{max-width:900px;margin:0 auto;padding:16px}
+header{background:linear-gradient(130deg,#235c37,#7a4b25);color:#fff;border-radius:22px;padding:24px;margin-bottom:14px}
+h1{font:700 clamp(23px,4.8vw,33px)/1.2 Lora,serif;margin:0 0 6px}
+header p{margin:0;opacity:.94}
+h2{font:700 21px/1.3 Lora,serif;margin:0 0 8px;color:var(--leaf-d)}
+h3{font:700 16px Nunito,sans-serif;margin:12px 0 4px}
+.card{background:var(--card);border:2px solid var(--line);border-radius:18px;padding:18px;margin-bottom:14px}
+.nav{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px}
+.nav a{background:var(--card);border:2px solid var(--line);border-radius:20px;padding:4px 12px;color:var(--ink);text-decoration:none;font-size:14px;font-weight:700}
+.nav a:hover{border-color:var(--leaf)}
+.grid{display:grid;grid-template-columns:2fr 1fr 1fr 1.4fr;gap:12px}
+label{font-weight:700;font-size:14px;display:block;margin-bottom:4px}
+input,select,textarea{width:100%;font:inherit;color:var(--ink);background:var(--card);border:2px solid var(--line);border-radius:10px;padding:8px 10px;min-height:42px}
+textarea{min-height:130px;resize:vertical}
+input:focus,select:focus,textarea:focus,button:focus-visible,a:focus-visible{outline:3px solid var(--sun);border-color:var(--leaf)}
+.info{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:10px}
+.info div{background:var(--soft);border-radius:14px;padding:12px 14px;font-size:15px}
+.info b{display:block;color:var(--leaf-d)}
+.num{display:inline-grid;place-items:center;width:32px;height:32px;border-radius:50%;background:var(--leaf);color:#fff;font:700 16px Nunito;margin-right:8px}
+.hint{background:var(--sand);border-radius:12px;padding:8px 12px;font-size:14px;margin:6px 0 10px}
+.scroll{overflow-x:auto;border:2px solid var(--line);border-radius:12px}
+table{border-collapse:collapse;width:100%;min-width:720px}
+th,td{padding:6px;border-bottom:1px solid var(--line);text-align:left}
+th{background:var(--leaf);color:#fff;font-size:14px}
+td:first-child{font-weight:700;background:var(--soft);white-space:nowrap}
+tr:last-child td{border-bottom:0}
+.pg{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:10px}
+table.pn{min-width:0;width:auto;border-collapse:separate;border-spacing:6px;margin:8px 0}
+table.pn th{border-radius:10px;padding:8px 18px;text-align:center}
+table.pn td{background:var(--sand);border-radius:10px;padding:14px 20px;text-align:center;font:700 20px Lora,serif;border:0}
+.res{background:var(--soft);border-radius:12px;padding:10px 14px;font-weight:600}
+.quote{background:var(--sand);border-left:6px solid var(--mace);border-radius:12px;padding:14px 16px;font-style:italic}
+.quote b{display:block;font-style:normal;color:var(--bark);margin-bottom:4px}
+.btns{display:flex;flex-wrap:wrap;gap:10px;margin-top:6px}
+button{font:700 16px Nunito,sans-serif;border:0;border-radius:12px;padding:12px 20px;cursor:pointer;min-height:46px}
+.p{background:var(--leaf);color:#fff}.p:hover{background:var(--leaf-d)}
+.s{background:var(--card);color:var(--ink);border:2px solid var(--line)}
+.note{color:var(--mute);font-size:14px}
+.pv,.pdate{display:none}
+@media (max-width:640px){.grid{grid-template-columns:1fr}}
+@media print{
+ :root{--bg:#fff;--card:#fff;--ink:#000;--line:#999;--soft:#f1f1f1;--sand:#f1f1f1;--leaf-d:#000;--bark:#000;--leaf:#444}
+ body{background:#fff;font-size:12px}.wrap{padding:0}
+ header{background:#fff;color:#000;border:2px solid #000;padding:10px;border-radius:8px}
+ .nav,.btns,.hint,.noprint{display:none!important}
+ .card{border:1px solid #999;break-inside:avoid;padding:10px;margin-bottom:8px}
+ .f{display:none!important}
+ .pv{display:block;white-space:pre-wrap;min-height:1.4em;border-bottom:1px dotted #777;padding:2px 0}
+ .scroll{overflow:visible;border:0}table{min-width:0}
+ th{background:#ddd!important;color:#000;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ td{border:1px solid #999}
+ .num{background:#444!important;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+ <h1>🌰 Menjadi Peneliti Muda dari Maluku Tengah</h1>
+ <p>Proyek: Merancang Bibit Unggul Biji Pala</p>
+</header>
+
+<nav class="nav" aria-label="Langkah">
+ <a href="#info">Informasi</a><a href="#l1">Langkah 1</a><a href="#l2">Langkah 2</a><a href="#l3">Langkah 3</a><a href="#l4">Langkah 4</a><a href="#l5">Langkah 5</a><a href="#ref">Refleksi</a>
+</nav>
+
+<section class="card">
+ <div class="grid">
+  <div><label for="nama">Nama siswa</label><input class="f" id="nama" placeholder="Nama lengkap"></div>
+  <div><label for="kelas">Kelas</label><input class="f" id="kelas" placeholder="IX-A"></div>
+  <div><label for="tgl">Tanggal</label><input class="f" id="tgl" type="date"></div>
+  <div><label for="mode">Kelompok / Individu</label><select class="f" id="mode"><option>Individu</option><option>Kelompok</option></select></div>
+ </div>
+ <div style="margin-top:10px"><label for="anggota">Anggota kelompok (jika berkelompok)</label><input class="f" id="anggota" placeholder="Tulis nama anggota"></div>
+</section>
+
+<section class="card" id="info">
+ <h2>Selamat datang, Peneliti Muda!</h2>
+ <p>Di Kepulauan Banda, Maluku Tengah, para petani dan tetua adat telah lama memilih biji pala terbaik untuk disemai. Kini kamu akan menjadi peneliti muda: menggali kearifan itu, lalu menjelaskannya dengan ilmu genetika.</p>
+ <div class="info">
+  <div><b>🎯 Tujuan</b>Menerapkan prinsip Hukum Mendel dan seleksi genetik untuk merancang strategi memperoleh bibit pala unggul (berbuah besar, lebat, dan beraroma tajam).</div>
+  <div><b>📋 Bentuk proyek</b>Studi kasus berbasis wawancara dengan petani pala atau tetua adat setempat, dipadukan dengan simulasi persilangan.</div>
+  <div><b>🧰 Alat dan bahan</b>Buku catatan wawancara, contoh biji pala dari pohon berbeda, alat tulis, meteran/timbangan.</div>
+ </div>
+</section>
+
+<section class="card" id="l1">
+ <h2><span class="num">1</span>Hasil wawancara petani lokal</h2>
+ <div class="hint">Tanyakan: bagaimana Opa atau petani memilih biji pala induk untuk disemai? Apa ciri pohon dan biji yang dipilih?</div>
+ <label for="narasumber">Narasumber</label><input class="f" id="narasumber" placeholder="Nama dan asal narasumber">
+ <label for="w1" style="margin-top:10px">Catatan hasil wawancara</label>
+ <textarea class="f" id="w1" placeholder="Tulis hasil wawancaramu di sini…"></textarea>
+</section>
+
+<section class="card" id="l2">
+ <h2><span class="num">2</span>Pengamatan ciri fisik pohon pala</h2>
+ <div class="hint">Amati dan ukur biji dari minimal 2 pohon berbeda. Baris ketiga boleh dikosongkan.</div>
+ <div class="scroll"><table>
+  <thead><tr><th>Pohon</th><th>Ukuran biji (cm / gram)</th><th>Warna</th><th>Aroma</th><th>Kelebatan buah</th><th>Catatan lain</th></tr></thead>
+  <tbody id="tb"></tbody>
+ </table></div>
+</section>
+
+<section class="card" id="l3">
+ <h2><span class="num">3</span>Analisis genetik</h2>
+ <div class="hint">Jelaskan mengapa bibit dari induk unggul bisa menghasilkan buah kurang baik. Gunakan istilah: gen, alel, dominan, resesif, heterozigot, Hukum Mendel I.</div>
+ <textarea class="f" id="w3" placeholder="Tulis analisismu…"></textarea>
+</section>
+
+<section class="card" id="l4">
+ <h2><span class="num">4</span>Diagram persilangan sederhana</h2>
+ <div class="hint">Pilih satu sifat pala, tentukan genotipe dua pohon induk, lalu lihat diagram Punnett-nya.</div>
+ <div class="pg">
+  <div><label for="sifat">Sifat yang diamati</label><input class="f" id="sifat" placeholder="Contoh: ukuran biji"></div>
+  <div><label for="dom">Fenotipe dominan</label><input class="f" id="dom" placeholder="Contoh: besar"></div>
+  <div><label for="res">Fenotipe resesif</label><input class="f" id="res" placeholder="Contoh: kecil"></div>
+  <div><label for="huruf">Simbol alel</label><select class="f" id="huruf"><option>B</option><option>K</option><option>P</option><option>A</option></select></div>
+  <div><label for="g1">Genotipe induk 1</label><select class="f" id="g1"></select></div>
+  <div><label for="g2">Genotipe induk 2</label><select class="f" id="g2"></select></div>
+ </div>
+ <div id="pn"></div>
+ <div class="res" id="pres"></div>
+ <label for="w4" style="margin-top:10px">Alasan memilih kedua induk dan tafsir hasilnya</label>
+ <textarea class="f" id="w4" placeholder="Mengapa memilih induk itu? Apa arti rasio keturunan?"></textarea>
+</section>
+
+<section class="card" id="l5">
+ <h2><span class="num">5</span>Laporan rekomendasi bibit unggul</h2>
+ <div class="hint">Susun rekomendasi untuk petani: induk seperti apa yang diseleksi, bagaimana mengujinya, dan apa alasannya.</div>
+ <textarea class="f" id="w5" style="min-height:170px" placeholder="Tulis rekomendasimu…"></textarea>
+</section>
+
+<section class="card" id="ref">
+ <h2>Dari belajar menjadi berkarya</h2>
+ <label for="w6">Apa yang kamu pelajari, dan bagaimana ilmu ini bisa berguna bagi petani pala di daerahmu?</label>
+ <textarea class="f" id="w6" placeholder="Tulis refleksimu…"></textarea>
+ <h3>Pesan untuk Ale</h3>
+ <div class="quote"><b>💌 Pesan untuk Ale</b>Ale, setiap biji pala menyimpan cerita panjang tentang tangan-tangan yang merawatnya. Ilmu yang kamu pelajari hari ini bukan untuk menggantikan kearifan Opa, melainkan untuk memahaminya lebih dalam. Teruslah bertanya, teruslah mengamati, dan jadilah peneliti yang membawa kebun pala Banda tumbuh ke masa depan.</div>
+</section>
+
+<section class="card noprint">
+ <div class="btns">
+  <button class="p" id="bpr">📄 Unduh Laporan Proyek (PDF)</button>
+  <button class="s" id="brs">🗑️ Mulai ulang</button>
+ </div>
+ <p class="note">Klik tombol, lalu pilih “Simpan sebagai PDF” di dialog cetak. Jawabanmu tersimpan otomatis di peramban ini.</p>
+</section>
+</div>
+
+<script>
+const $=id=>document.getElementById(id);
+const KEY="proyek-pala-banda-v1";
+// tabel pengamatan
+$("tb").innerHTML=["Pohon A","Pohon B","Pohon C"].map(p=>`<tr><td>${p}</td>
+<td><input class="f" aria-label="${p} ukuran"></td><td><input class="f" aria-label="${p} warna"></td>
+<td><select class="f" aria-label="${p} aroma"><option value="">Pilih…</option><option>Sangat tajam</option><option>Tajam</option><option>Sedang</option><option>Lemah</option></select></td>
+<td><select class="f" aria-label="${p} buah"><option value="">Pilih…</option><option>Lebat</option><option>Sedang</option><option>Jarang</option></select></td>
+<td><input class="f" aria-label="${p} catatan"></td></tr>`).join("");
+$("tgl").valueAsDate=new Date();
+// Punnett
+function fillGeno(){const h=$("huruf").value,l=h.toLowerCase(),o=[h+h,h+l,l+l];
+ ["g1","g2"].forEach((id,i)=>{const s=$(id),v=s.value;s.innerHTML=o.map(x=>`<option>${x}</option>`).join("");s.value=o.includes(v)?v:o[i?1:1]})}
+function punnett(){
+ const h=$("huruf").value,g1=$("g1").value,g2=$("g2").value;if(!g1||!g2)return;
+ const sort=(a,b)=>(a===a.toUpperCase()?0:1)-(b===b.toUpperCase()?0:1);
+ const cell=(a,b)=>[a,b].sort(sort).join("");
+ const t=[g1[0],g1[1]],l=[g2[0],g2[1]],cnt={},dom=[0,0];
+ let html=`<table class="pn"><tr><th></th>${t.map(x=>`<th>${x}</th>`).join("")}</tr>`;
+ l.forEach(a=>{html+=`<tr><th>${a}</th>`;t.forEach(b=>{const c=cell(a,b);cnt[c]=(cnt[c]||0)+1;dom[c===c.toLowerCase()?1:0]++;html+=`<td>${c}</td>`});html+="</tr>"});
+ $("pn").innerHTML=html+"</table>";
+ const d=$("dom").value.trim()||"dominan",r=$("res").value.trim()||"resesif";
+ $("pres").textContent="Genotipe: "+Object.entries(cnt).map(([k,v])=>k+" = "+v+"/4").join(", ")+". Fenotipe: "+d+" "+dom[0]*25+"%, "+r+" "+dom[1]*25+"%."}
+// Simpan otomatis
+const F=()=>[...document.querySelectorAll(".f")];
+function save(){try{localStorage.setItem(KEY,JSON.stringify(F().map(e=>e.value)))}catch(e){}}
+function restore(){try{const v=JSON.parse(localStorage.getItem(KEY)||"null");if(!Array.isArray(v))return;
+ const f=F();f.forEach((e,i)=>{if(e.id==="huruf")e.value=v[i]});fillGeno();f.forEach((e,i)=>{if(i<v.length&&v[i]!==undefined)e.value=v[i]})}catch(e){}}
+document.addEventListener("input",e=>{if(e.target.classList.contains("f")){save();if(["dom","res","g1","g2"].includes(e.target.id))punnett()}});
+document.addEventListener("change",e=>{if(e.target.id==="huruf"){fillGeno()}if(e.target.classList.contains("f")){save();punnett()}});
+// Cetak
+function syncPrint(){F().forEach(e=>{let p=e.nextElementSibling;if(!p||!p.classList.contains("pv")){p=document.createElement("div");p.className="pv";e.after(p)}
+ p.textContent=e.tagName==="SELECT"?(e.value||""):(e.type==="date"&&e.value?e.value.split("-").reverse().join("/"):e.value)})}
+window.addEventListener("beforeprint",syncPrint);
+$("bpr").onclick=()=>{syncPrint();window.print()};
+$("brs").onclick=()=>{if(!confirm("Hapus semua isian dan mulai ulang?"))return;try{localStorage.removeItem(KEY)}catch(e){}
+ F().forEach(e=>{if(e.tagName!=="SELECT")e.value=""});$("tgl").valueAsDate=new Date();$("mode").selectedIndex=0;$("huruf").selectedIndex=0;fillGeno();document.querySelectorAll("#tb select").forEach(s=>s.selectedIndex=0);punnett();save()};
+fillGeno();restore();punnett();
+</script>
+</body>
+</html>
